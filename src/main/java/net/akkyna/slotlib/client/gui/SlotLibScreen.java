@@ -24,8 +24,6 @@ import net.akkyna.slotlib.common.inventory.container.SlotLibContainer;
 public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContainer>
         implements RecipeUpdateListener {
 
-    static final ResourceLocation SLOTLIB_INVENTORY =
-            ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "textures/gui/slotlib/inventory.png");
 
     private final RecipeBookComponent recipeBookGui = new RecipeBookComponent();
     public boolean widthTooNarrow;
@@ -38,16 +36,13 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
 
     public SlotLibScreen(SlotLibContainer container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
-        // Extend the image height to accommodate extra slot row below
-        this.imageHeight = 166 + 32; // 32 extra pixels for the slot panel below
     }
 
     @Override
     public void init() {
+        super.init();
         if (this.minecraft != null) {
             this.panelHeight = 32;
-            this.leftPos = (this.width - 176) / 2;
-            this.topPos = (this.height - this.imageHeight) / 2;
             this.widthTooNarrow = true;
             this.recipeBookGui.init(this.width, this.height, this.minecraft, true, this.menu);
             this.addWidget(this.recipeBookGui);
@@ -126,40 +121,26 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
 
             // Draw the SlotLib panel below the vanilla inventory
             int slotCount = this.menu.getSlotLibSlotCount();
-            int panelX = i;
             int panelY = j + 166;
 
-            // Draw panel background - a simple bordered panel
-            // Top border
-            guiGraphics.fill(panelX, panelY, panelX + 176, panelY + 1, 0xFFC6C6C6);
-            // Background fill
-            guiGraphics.fill(panelX, panelY + 1, panelX + 176, panelY + 31, 0xFFC6C6C6);
-            // Bottom border
-            guiGraphics.fill(panelX, panelY + 31, panelX + 176, panelY + 32, 0xFF555555);
-            // Left border
-            guiGraphics.fill(panelX, panelY, panelX + 1, panelY + 32, 0xFFFFFFFF);
-            // Right border
-            guiGraphics.fill(panelX + 175, panelY, panelX + 176, panelY + 32, 0xFF555555);
+            // left edge
+            guiGraphics.blit(INVENTORY_LOCATION, i, j +168, 0, 0, 7, 25); //top left corner
+            guiGraphics.blit(INVENTORY_LOCATION, i, j +193, 0, 159, 7, 7); // bottom right corner
 
             // Draw slot backgrounds
             for (int s = 0; s < slotCount; s++) {
                 int slotX = i + 7 + s * 18;
-                int slotY = panelY + 5;
-                // Slot border (dark)
-                guiGraphics.fill(slotX, slotY, slotX + 18, slotY + 18, 0xFF8B8B8B);
-                // Slot inner (darker)
-                guiGraphics.fill(slotX + 1, slotY + 1, slotX + 17, slotY + 17, 0xFF373737);
-                // Slot highlight (lighter borders for 3D effect)
-                guiGraphics.fill(slotX, slotY, slotX + 17, slotY + 1, 0xFF373737);
-                guiGraphics.fill(slotX, slotY, slotX + 1, slotY + 17, 0xFF373737);
-                guiGraphics.fill(slotX + 17, slotY, slotX + 18, slotY + 18, 0xFFFFFFFF);
-                guiGraphics.fill(slotX, slotY + 17, slotX + 18, slotY + 18, 0xFFFFFFFF);
+                int slotY = panelY + 9;
+
+                guiGraphics.blit(INVENTORY_LOCATION, slotX, slotY, 7, 83, 18, 18); // slot
+                guiGraphics.blit(INVENTORY_LOCATION, slotX, slotY-7, 7, 0, 18, 7); // border up
+                guiGraphics.blit(INVENTORY_LOCATION, slotX, slotY+18, 7, 159, 18, 7); // border down
+
             }
 
-            // Draw the "SlotLib" label
-            guiGraphics.drawString(this.font,
-                    Component.translatable("slotlib.gui.title"),
-                    panelX + 8, panelY - 10, 4210752, false);
+            guiGraphics.blit(INVENTORY_LOCATION, i+7+slotCount*18, j +168, 169, 0, 7, 25); //top left corner
+            guiGraphics.blit(INVENTORY_LOCATION, i+7+slotCount*18, j +193, 169, 159, 7, 7); // bottom right corner
+
         }
     }
 
@@ -204,12 +185,14 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
     @Override
     protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn,
                                         int mouseButton) {
+        // Include the panel below the vanilla inventory in the "inside" area
+        int totalHeight = this.imageHeight + this.panelHeight;
         boolean flag = mouseX < guiLeftIn
                 || mouseY < guiTopIn
                 || mouseX >= guiLeftIn + this.imageWidth
-                || mouseY >= guiTopIn + this.imageHeight;
+                || mouseY >= guiTopIn + totalHeight;
         return this.recipeBookGui.hasClickedOutside(mouseX, mouseY, this.leftPos, this.topPos,
-                this.imageWidth, this.imageHeight, mouseButton) && flag;
+                this.imageWidth, totalHeight, mouseButton) && flag;
     }
 
     @Override

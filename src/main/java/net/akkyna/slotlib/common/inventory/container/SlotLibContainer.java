@@ -138,7 +138,7 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
         int slotCount = this.slotLibInventory.getSlots();
         for (int i = 0; i < slotCount; i++) {
             this.addSlot(new SlotItemHandler(this.slotLibInventory.getStacks(), i,
-                    8 + i * 18, 172));
+                    8 + i * 18, 176));
         }
     }
 
