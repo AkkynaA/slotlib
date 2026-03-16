@@ -37,8 +37,9 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
 
     @Override
     public void init() {
-        super.init();
         if (this.minecraft != null) {
+            this.leftPos = (this.width - this.imageWidth) / 2;
+            this.topPos = (this.height - this.imageHeight) / 2;
             this.panelHeight = 32;
             this.widthTooNarrow = true;
             this.recipeBookGui.init(this.width, this.height, this.minecraft, true, this.menu);
@@ -51,11 +52,10 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
                 this.recipeBookGui.toggleVisibility();
             }
 
-            // Button position - near the crafting output area
             this.buttonSlotLib = new SlotLibButton(
                     this,
-                    this.getGuiLeft() + 126,
-                    this.getGuiTop() + 63,
+                    this.getGuiLeft(),
+                    this.getGuiTop(),
                     10, 10,
                     SlotLibButton.BIG);
             this.addRenderableWidget(this.buttonSlotLib);

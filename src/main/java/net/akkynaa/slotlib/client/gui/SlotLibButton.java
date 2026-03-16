@@ -61,9 +61,10 @@ public class SlotLibButton extends ImageButton {
     @Override
     public void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY,
                              float partialTicks) {
-        // Position the button: below the inventory area, offset from the right
-        this.setX(parentGui.getGuiLeft() + 126);
-        int yOffset = parentGui instanceof CreativeModeInventoryScreen ? 38 : 63;
+
+        int xOffset = parentGui instanceof CreativeModeInventoryScreen ? 95 : 63;
+        this.setX(parentGui.getGuiLeft() + xOffset);
+        int yOffset = parentGui instanceof CreativeModeInventoryScreen ? 39 : 66;
         this.setY(parentGui.getGuiTop() + yOffset);
 
         if (parentGui instanceof CreativeModeInventoryScreen gui) {
