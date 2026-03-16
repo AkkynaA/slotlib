@@ -5,7 +5,9 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.akkynaa.slotlib.client.compat.CuriosCompat;
 
 public class GuiEventHandler {
 
@@ -21,6 +23,10 @@ public class GuiEventHandler {
             evt.addListener(
                     new SlotLibButton(gui, pos[0], pos[1], size, size,
                             isCreative ? SlotLibButton.SMALL : SlotLibButton.BIG));
+        } else if (ModList.get().isLoaded("curios")
+                && CuriosCompat.isCuriosScreen(screen)
+                && screen instanceof AbstractContainerScreen<?> gui) {
+            CuriosCompat.addSlotLibButtonToCuriosScreen(evt, gui);
         }
     }
 }

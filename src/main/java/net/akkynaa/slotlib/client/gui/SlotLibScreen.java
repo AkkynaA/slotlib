@@ -16,7 +16,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.akkynaa.slotlib.client.KeyRegistry;
+import net.akkynaa.slotlib.client.compat.CuriosCompat;
 import net.akkynaa.slotlib.common.inventory.container.SlotLibContainer;
+import net.neoforged.fml.ModList;
 
 public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContainer>
         implements RecipeUpdateListener {
@@ -59,6 +61,10 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
                     10, 10,
                     SlotLibButton.BIG);
             this.addRenderableWidget(this.buttonSlotLib);
+
+            if (ModList.get().isLoaded("curios")) {
+                this.addRenderableWidget(CuriosCompat.createCuriosButtonForSlotLibScreen(this));
+            }
 
             if (!this.menu.player.isCreative()) {
                 this.recipeBookButton = new ImageButton(

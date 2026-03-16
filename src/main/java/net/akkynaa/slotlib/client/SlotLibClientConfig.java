@@ -41,9 +41,6 @@ public class SlotLibClientConfig {
         }
 
         public enum ButtonCorner {
-            // Offsets relative to guiLeft/guiTop for survival and creative inventories
-            // Survival player model area: roughly x=26..75, y=8..78
-            // Creative player model area: roughly x=73..105, y=8..45
             TOP_LEFT(28, 10, 75, 8),
             TOP_RIGHT(63, 10, 95, 8),
             BOTTOM_LEFT(28, 66, 75, 39),

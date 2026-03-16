@@ -25,6 +25,9 @@ public class SlotLibServerPayloadHandler {
                 ItemStack stack =
                         player.isCreative() ? data.carried() : player.containerMenu.getCarried();
                 player.containerMenu.setCarried(ItemStack.EMPTY);
+                if (player.containerMenu != player.inventoryMenu) {
+                    serverPlayer.doCloseContainer();
+                }
                 player.openMenu(new SlotLibContainerProvider());
 
                 if (!stack.isEmpty()) {

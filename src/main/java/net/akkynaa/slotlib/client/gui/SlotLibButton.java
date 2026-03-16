@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -31,7 +32,7 @@ public class SlotLibButton extends ImageButton {
 
     private final AbstractContainerScreen<?> parentGui;
 
-    SlotLibButton(AbstractContainerScreen<?> parentGui, int xIn, int yIn, int widthIn, int heightIn,
+    public SlotLibButton(AbstractContainerScreen<?> parentGui, int xIn, int yIn, int widthIn, int heightIn,
                   WidgetSprites sprites) {
         super(xIn, yIn, widthIn, heightIn, sprites,
                 (button) -> {
@@ -52,6 +53,10 @@ public class SlotLibButton extends ImageButton {
                                 if (recipeBookGui.isVisible()) {
                                     recipeBookGui.toggleVisibility();
                                 }
+                            } else if (mc.player.containerMenu != mc.player.inventoryMenu) {
+                                mc.player.connection.send(new ServerboundContainerClosePacket(
+                                        mc.player.containerMenu.containerId));
+                                mc.player.containerMenu = mc.player.inventoryMenu;
                             }
                             PacketDistributor.sendToServer(new CPacketOpenSlotLib(stack));
                         }
