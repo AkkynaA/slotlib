@@ -17,10 +17,9 @@ public class GuiEventHandler {
             AbstractContainerScreen<?> gui = (AbstractContainerScreen<?>) screen;
             boolean isCreative = screen instanceof CreativeModeInventoryScreen;
             int size = isCreative ? 8 : 10;
-            int x = gui.getGuiLeft() + 126;
-            int y = gui.getGuiTop() + (isCreative ? 38 : 63);
+            int[] pos = SlotLibButton.getButtonPosition(gui);
             evt.addListener(
-                    new SlotLibButton(gui, x, y, size, size,
+                    new SlotLibButton(gui, pos[0], pos[1], size, size,
                             isCreative ? SlotLibButton.SMALL : SlotLibButton.BIG));
         }
     }

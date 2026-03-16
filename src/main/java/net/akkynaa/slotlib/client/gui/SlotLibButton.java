@@ -13,6 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.akkynaa.slotlib.SlotLib;
+import net.akkynaa.slotlib.client.SlotLibClientConfig;
+import net.akkynaa.slotlib.client.SlotLibClientConfig.Client.ButtonCorner;
 import net.akkynaa.slotlib.common.network.client.CPacketOpenSlotLib;
 import net.akkynaa.slotlib.common.network.client.CPacketOpenVanilla;
 
@@ -58,14 +60,28 @@ public class SlotLibButton extends ImageButton {
         this.parentGui = parentGui;
     }
 
+    public static int[] getButtonPosition(AbstractContainerScreen<?> gui) {
+        boolean isCreative = gui instanceof CreativeModeInventoryScreen;
+        SlotLibClientConfig.Client client = SlotLibClientConfig.CLIENT;
+        ButtonCorner corner = client.buttonCorner.get();
+
+        int x, y;
+        if (isCreative) {
+            x = gui.getGuiLeft() + corner.getCreativeXOffset() + client.creativeButtonXOffset.get();
+            y = gui.getGuiTop() + corner.getCreativeYOffset() + client.creativeButtonYOffset.get();
+        } else {
+            x = gui.getGuiLeft() + corner.getXOffset() + client.buttonXOffset.get();
+            y = gui.getGuiTop() + corner.getYOffset() + client.buttonYOffset.get();
+        }
+        return new int[]{x, y};
+    }
+
     @Override
     public void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY,
                              float partialTicks) {
-
-        int xOffset = parentGui instanceof CreativeModeInventoryScreen ? 95 : 63;
-        this.setX(parentGui.getGuiLeft() + xOffset);
-        int yOffset = parentGui instanceof CreativeModeInventoryScreen ? 39 : 66;
-        this.setY(parentGui.getGuiTop() + yOffset);
+        int[] pos = getButtonPosition(parentGui);
+        this.setX(pos[0]);
+        this.setY(pos[1]);
 
         if (parentGui instanceof CreativeModeInventoryScreen gui) {
             boolean isInventoryTab = gui.isInventoryOpen();

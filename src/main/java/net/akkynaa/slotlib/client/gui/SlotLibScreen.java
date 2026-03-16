@@ -52,10 +52,10 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
                 this.recipeBookGui.toggleVisibility();
             }
 
+            int[] btnPos = SlotLibButton.getButtonPosition(this);
             this.buttonSlotLib = new SlotLibButton(
                     this,
-                    this.getGuiLeft(),
-                    this.getGuiTop(),
+                    btnPos[0], btnPos[1],
                     10, 10,
                     SlotLibButton.BIG);
             this.addRenderableWidget(this.buttonSlotLib);
