@@ -140,6 +140,7 @@ tasks.withType(ProcessResources).configureEach {
             minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,
             neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
             loader_version_range   : loader_version_range,
             mod_id                 : mod_id,
             mod_name               : mod_name,
@@ -153,16 +154,38 @@ tasks.withType(ProcessResources).configureEach {
     }
 }
 
-// Example configuration to allow publishing using the maven-publish plugin
 publishing {
     publications {
-        register('mavenJava', MavenPublication) {
+        mavenJava(MavenPublication) {
             from components.java
+            groupId = 'net.akkynaa'
+            artifactId = mod_id
+            version = mod_version
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            url = uri("${System.getProperty('user.home')}/maven")
+        }
+    }
+}
+
+tasks.register('publishAndPush') {
+    dependsOn 'publish'
+    def commitMsg = "Publish ${mod_id} ${mod_version}"
+    def mavenPath = "${System.getProperty('user.home')}/maven"
+    doLast {
+        def mavenDir = new File(mavenPath)
+        def commands = [
+            ['git', 'add', '-A'] as String[],
+            ['git', 'commit', '-m', commitMsg] as String[],
+            ['git', 'push'] as String[]
+        ]
+        commands.each { cmd ->
+            def pb = new ProcessBuilder(cmd as List<String>).directory(mavenDir).redirectErrorStream(true)
+            def proc = pb.start()
+            proc.inputStream.eachLine { logger.lifecycle(it) }
+            proc.waitFor()
         }
     }
 }

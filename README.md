@@ -1,25 +1,40 @@
+# SlotLib
 
-Installation information
-=======
+A heavily modified fork of [Curios API](https://github.com/TheIllusiveC4/Curios), designed specifically for [More Offhand Slots](https://github.com/AkkynaA/moreoffhandslots).
+Provides configurable extra inventory slots that accept any item, with a dedicated GUI, networking, and persistence built in.
+It is not published as a standalone mod (yet) - it is distributed embedded in More Offhand Slots via JarJar. The source is available here for anyone who wants to build on it.
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+## Issues
+If you are here to give feedback on [More Offhand Slots](https://github.com/AkkynaA/moreoffhandslots), please refer to its own [GitHub issues page](https://github.com/AkkynaA/moreoffhandslots/issues).
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+## What it provides
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+- 1–9 extra inventory slots (configurable), rendered below the vanilla inventory
+- Every basic slot management functionality from Curios
+- Optional Curios compatibility (toggle buttons on each other's screens)
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+## Using SlotLib as a dependency
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+SlotLib is hosted on a [GitHub Pages Maven repository](https://maven.akkynaa.net).
+
+```groovy
+repositories {
+    maven { url = "https://maven.akkynaa.net" }
+}
+
+dependencies {
+    implementation "net.akkynaa:slotlib:21.1.0"
+}
+```
+
+### Accessing a player's extra slots
+
+```java
+SlotLibInventory inv = player.getData(SlotLibRegistry.INVENTORY);
+ItemStack stack = inv.getStackInSlot(0);
+int count = inv.getSlotCount();
+```
+
+## License
+
+[GPL-3.0-or-later](https://www.gnu.org/licenses/gpl-3.0.html)
