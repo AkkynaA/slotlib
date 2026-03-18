@@ -1,3 +1,8 @@
+/*
+ * This file is a modified version of code originally from Curios API by TheIllusiveC4.
+ * Original source: https://github.com/TheIllusiveC4/Curios
+ * Licensed under LGPL-3.0-or-later. Modifications are licensed under GPL-3.0-or-later.
+ */
 package net.akkynaa.slotlib.common.network.server;
 
 import net.minecraft.server.level.ServerPlayer;
