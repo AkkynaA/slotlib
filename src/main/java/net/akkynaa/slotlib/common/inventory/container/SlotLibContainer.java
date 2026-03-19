@@ -40,6 +40,8 @@ import java.util.Optional;
 
 import net.akkynaa.slotlib.common.SlotLibRegistry;
 import net.akkynaa.slotlib.common.capability.SlotLibInventory;
+import net.akkynaa.slotlib.compat.BackpackCompat;
+import net.neoforged.fml.ModList;
 
 public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeInput>> {
 
@@ -69,6 +71,11 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
     }
 
     private void setupSlots() {
+        int backpackOffset = 0;
+        if (ModList.get().isLoaded("yyzsbackpack")) {
+            backpackOffset = BackpackCompat.getSlotIndexOffset();
+        }
+
         // Crafting result slot (index 0)
         this.addSlot(new ResultSlot(player, this.craftMatrix, this.craftResult, 0, 154, 28));
 
@@ -82,7 +89,7 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
         // 4 armor slots (indices 5-8)
         for (int k = 0; k < 4; ++k) {
             final EquipmentSlot equipmentSlot = VALID_EQUIPMENT_SLOTS[k];
-            this.addSlot(new Slot(player.getInventory(), 36 + (3 - k), 8, 8 + k * 18) {
+            this.addSlot(new Slot(player.getInventory(), 36 + backpackOffset + (3 - k), 8, 8 + k * 18) {
                 @Override
                 public void set(@Nonnull ItemStack stack) {
                     ItemStack old = this.getItem();
@@ -130,7 +137,7 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
         }
 
         // Shield slot (index 45)
-        this.addSlot(new Slot(player.getInventory(), 40, 77, 62) {
+        this.addSlot(new Slot(player.getInventory(), 40 + backpackOffset, 77, 62) {
             @OnlyIn(Dist.CLIENT)
             @Override
             public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
@@ -144,6 +151,11 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
         for (int i = 0; i < slotCount; i++) {
             this.addSlot(new SlotItemHandler(this.slotLibInventory.getStacks(), i,
                     8 + i * 18, 176));
+        }
+
+        // Backpack slots (after SlotLib slots, when yyzsbackpack is loaded)
+        if (ModList.get().isLoaded("yyzsbackpack")) {
+            BackpackCompat.addBackpackSlots(this, player.getInventory());
         }
     }
 

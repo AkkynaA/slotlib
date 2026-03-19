@@ -21,7 +21,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.akkynaa.slotlib.client.KeyRegistry;
+import net.akkynaa.slotlib.client.compat.BackpackClientCompat;
 import net.akkynaa.slotlib.client.compat.CuriosCompat;
+import net.akkynaa.slotlib.compat.BackpackCompat;
 import net.akkynaa.slotlib.common.inventory.container.SlotLibContainer;
 import net.neoforged.fml.ModList;
 
@@ -94,6 +96,11 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
 
     @Override
     public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        if (ModList.get().isLoaded("yyzsbackpack")) {
+            BackpackCompat.setBackpackVisible(this.menu, !this.recipeBookGui.isVisible());
+            BackpackCompat.setBackpackGuiPos(this.menu, 0, 0);
+        }
+
         if (this.recipeBookGui.isVisible() && this.widthTooNarrow) {
             this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
             this.recipeBookGui.render(guiGraphics, mouseX, mouseY, partialTicks);
@@ -149,6 +156,10 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
             guiGraphics.blit(INVENTORY_LOCATION, i+7+slotCount*18, j +168, 169, 0, 7, 25); //top left corner
             guiGraphics.blit(INVENTORY_LOCATION, i+7+slotCount*18, j +193, 169, 159, 7, 7); // bottom right corner
 
+            // Render backpack equip slot background if yyzsbackpack is loaded
+            if (ModList.get().isLoaded("yyzsbackpack")) {
+                BackpackClientCompat.renderEquipSlotBackground(this.menu, guiGraphics, i, j);
+            }
         }
     }
 

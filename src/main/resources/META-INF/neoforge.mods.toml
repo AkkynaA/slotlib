@@ -33,3 +33,10 @@ Slot system designed for More Offhand Slots.
     versionRange="[9.0,)"
     ordering="AFTER"
     side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="yyzsbackpack"
+    type="optional"
+    versionRange="[1.0,)"
+    ordering="AFTER"
+    side="BOTH"
