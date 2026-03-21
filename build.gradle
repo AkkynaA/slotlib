@@ -9,7 +9,7 @@ version = mod_version
 group = mod_group_id
 
 base {
-    archivesName = mod_id
+    archivesName = "${mod_id}-forge"
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -126,7 +126,7 @@ publishing {
             artifact jar
             groupId = 'net.akkynaa'
             artifactId = mod_id
-            version = mod_version
+            version = "forge-${mod_version}"
         }
     }
     repositories {
