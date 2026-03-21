@@ -38,7 +38,7 @@ repositories {
 }
 
 base {
-    archivesName = mod_id
+    archivesName = "${mod_id}-neoforge"
 }
 
 // Mojang ships Java 21 to end users in 1.21.1, so mods should target Java 21.
@@ -115,7 +115,7 @@ dependencies {
 
     // yyzsbackpack - soft dependency, compile-only
     //compileOnly "curse.maven:yyzsbackpack-1285177:7019339"
-    implementation files("libs/yyzsbackpack-neoforge-21.1.2.jar")
+    implementation "maven.modrinth:yyzs-backpack:A6bCvCiA"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
@@ -149,7 +149,7 @@ publishing {
             from components.java
             groupId = 'net.akkynaa'
             artifactId = mod_id
-            version = mod_version
+            version = "neoforge-${mod_version}"
         }
     }
     repositories {
