@@ -3,7 +3,6 @@ package net.akkynaa.slotlib.client.compat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -23,10 +22,8 @@ import net.akkynaa.slotlib.client.gui.SlotLibScreen;
 
 public class CuriosCompat {
 
-    private static final ResourceLocation CURIOS_BUTTON =
-            new ResourceLocation("curios", "textures/gui/button.png");
-    private static final ResourceLocation CURIOS_BUTTON_HIGHLIGHTED =
-            new ResourceLocation("curios", "textures/gui/button_highlighted.png");
+    private static final ResourceLocation CURIOS_INVENTORY =
+            new ResourceLocation("curios", "textures/gui/inventory.png");
 
     public static boolean isCuriosScreen(Screen screen) {
         return screen instanceof ICuriosScreen;
@@ -40,7 +37,7 @@ public class CuriosCompat {
     }
 
     public static AbstractWidget createCuriosButtonForSlotLibScreen(SlotLibScreen screen) {
-        return new AbstractWidget(0, 0, 10, 10, Component.empty()) {
+        return new AbstractWidget(0, 0, 14, 14, Component.empty()) {
 
             @Override
             public void onClick(double mouseX, double mouseY) {
@@ -60,12 +57,12 @@ public class CuriosCompat {
             @Override
             public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
                 Tuple<Integer, Integer> offsets = CuriosScreen.getButtonOffset(false);
-                this.setX(screen.getGuiLeft() + offsets.getA() + 2);
-                this.setY(screen.getGuiTop() + offsets.getB() + 85);
+                this.setX(screen.getGuiLeft() + offsets.getA());
+                this.setY(screen.getGuiTop() + offsets.getB() + 83);
 
-                ResourceLocation texture = this.isHovered ? CURIOS_BUTTON_HIGHLIGHTED : CURIOS_BUTTON;
-                guiGraphics.blit(texture, this.getX(), this.getY(), 0, 0,
-                        this.width, this.height, this.width, this.height);
+                int yTex = this.isHovered ? 14 : 0;
+                guiGraphics.blit(CURIOS_INVENTORY, this.getX(), this.getY(), 50, yTex,
+                        this.width, this.height, 256, 256);
             }
 
             @Override
