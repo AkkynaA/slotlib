@@ -27,9 +27,13 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
 
-            // Disable mixin refmap so third-party mods (Curios, yyzsbackpack) don't crash
-            // due to SRG names in their refmaps not matching official mappings in dev
-            property 'mixin.env.disableRefMap', 'true'
+            // Remap SRG-named mixin refmaps to official mappings at runtime
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            // Also pass as JVM args since mixin may initialize before system properties are set
+            jvmArg "-Dmixin.env.remapRefMap=true"
+            jvmArg "-Dmixin.env.refMapRemappingFile=${projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
                 "${mod_id}" {
