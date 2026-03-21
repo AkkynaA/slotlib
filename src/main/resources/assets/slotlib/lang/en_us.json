@@ -1,0 +1,26 @@
+{
+  "key.slotlib.open.desc": "Open SlotLib Inventory",
+  "key.slotlib.category": "SlotLib",
+  "slotlib.gui.title": "Extra Slots",
+
+  "slotlib.configuration.title": "SlotLib Configuration",
+  "slotlib.configuration.general": "General",
+  "slotlib.configuration.slotCount": "Slot Count",
+  "slotlib.configuration.slotCount.tooltip": "Number of extra inventory slots (1-9)",
+
+  "slotlib.configuration.client": "Client",
+  "slotlib.configuration.buttonCorner": "Button Corner",
+  "slotlib.configuration.buttonCorner.tooltip": "The corner of the player model to place the SlotLib button",
+  "slotlib.configuration.buttonCorner.TOP_LEFT": "Top Left",
+  "slotlib.configuration.buttonCorner.TOP_RIGHT": "Top Right",
+  "slotlib.configuration.buttonCorner.BOTTOM_LEFT": "Bottom Left",
+  "slotlib.configuration.buttonCorner.BOTTOM_RIGHT": "Bottom Right",
+  "slotlib.configuration.buttonXOffset": "Button X Offset",
+  "slotlib.configuration.buttonXOffset.tooltip": "Additional X offset for the button in survival inventory",
+  "slotlib.configuration.buttonYOffset": "Button Y Offset",
+  "slotlib.configuration.buttonYOffset.tooltip": "Additional Y offset for the button in survival inventory",
+  "slotlib.configuration.creativeButtonXOffset": "Creative Button X Offset",
+  "slotlib.configuration.creativeButtonXOffset.tooltip": "Additional X offset for the button in creative inventory",
+  "slotlib.configuration.creativeButtonYOffset": "Creative Button Y Offset",
+  "slotlib.configuration.creativeButtonYOffset.tooltip": "Additional Y offset for the button in creative inventory"
+}
