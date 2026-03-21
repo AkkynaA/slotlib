@@ -1,14 +1,14 @@
 package net.akkynaa.slotlib;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 public class SlotLibConfig {
 
-    public static final ModConfigSpec SPEC;
-    public static final ModConfigSpec.IntValue SLOT_COUNT;
+    public static final ForgeConfigSpec SPEC;
+    public static final ForgeConfigSpec.IntValue SLOT_COUNT;
 
     static {
-        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("SlotLib Configuration");
         builder.push("general");
         SLOT_COUNT = builder

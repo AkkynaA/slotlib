@@ -17,19 +17,23 @@ import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.crafting.Recipe;
 import net.akkynaa.slotlib.client.KeyRegistry;
 import net.akkynaa.slotlib.client.compat.BackpackClientCompat;
 import net.akkynaa.slotlib.client.compat.CuriosCompat;
 import net.akkynaa.slotlib.compat.BackpackCompat;
 import net.akkynaa.slotlib.common.inventory.container.SlotLibContainer;
-import net.neoforged.fml.ModList;
+import net.minecraftforge.fml.ModList;
 
 public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContainer>
         implements RecipeUpdateListener {
 
+    private static final ResourceLocation RECIPE_BUTTON_LOCATION =
+            new ResourceLocation("textures/gui/recipe_button.png");
 
     private final RecipeBookComponent recipeBookGui = new RecipeBookComponent();
     public boolean widthTooNarrow;
@@ -66,7 +70,7 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
                     this,
                     btnPos[0], btnPos[1],
                     10, 10,
-                    SlotLibButton.BIG);
+                    false);
             this.addRenderableWidget(this.buttonSlotLib);
 
             if (ModList.get().isLoaded("curios")) {
@@ -78,7 +82,8 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
                         this.leftPos + 104,
                         this.height / 2 - 22,
                         20, 18,
-                        RecipeBookComponent.RECIPE_BUTTON_SPRITES,
+                        0, 0, 19,
+                        RECIPE_BUTTON_LOCATION,
                         (button) -> {
                             this.recipeBookGui.toggleVisibility();
                             button.setPosition(this.leftPos + 104, this.height / 2 - 22);
@@ -101,8 +106,8 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
             BackpackCompat.setBackpackGuiPos(this.menu, 0, 0);
         }
 
+        this.renderBackground(guiGraphics);
         if (this.recipeBookGui.isVisible() && this.widthTooNarrow) {
-            this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
             this.recipeBookGui.render(guiGraphics, mouseX, mouseY, partialTicks);
         } else {
             this.recipeBookGui.render(guiGraphics, mouseX, mouseY, partialTicks);
@@ -131,16 +136,17 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
 
             // Render player model
             InventoryScreen.renderEntityInInventoryFollowsMouse(
-                    guiGraphics, i + 26, j + 8, i + 75, j + 78, 30, 0.0625F,
-                    mouseX, mouseY, this.minecraft.player);
+                    guiGraphics, i + 51, j + 75, 30,
+                    (float) (i + 51) - mouseX, (float) (j + 75 - 50) - mouseY,
+                    this.minecraft.player);
 
             // Draw the SlotLib panel below the vanilla inventory
             int slotCount = this.menu.getSlotLibSlotCount();
             int panelY = j + 166;
 
             // left edge
-            guiGraphics.blit(INVENTORY_LOCATION, i, j +168, 0, 0, 7, 25); //top left corner
-            guiGraphics.blit(INVENTORY_LOCATION, i, j +193, 0, 159, 7, 7); // bottom right corner
+            guiGraphics.blit(INVENTORY_LOCATION, i, j + 168, 0, 0, 7, 25); //top left corner
+            guiGraphics.blit(INVENTORY_LOCATION, i, j + 193, 0, 159, 7, 7); // bottom right corner
 
             // Draw slot backgrounds
             for (int s = 0; s < slotCount; s++) {
@@ -148,13 +154,12 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
                 int slotY = panelY + 9;
 
                 guiGraphics.blit(INVENTORY_LOCATION, slotX, slotY, 7, 83, 18, 18); // slot
-                guiGraphics.blit(INVENTORY_LOCATION, slotX, slotY-7, 7, 0, 18, 7); // border up
-                guiGraphics.blit(INVENTORY_LOCATION, slotX, slotY+18, 7, 159, 18, 7); // border down
-
+                guiGraphics.blit(INVENTORY_LOCATION, slotX, slotY - 7, 7, 0, 18, 7); // border up
+                guiGraphics.blit(INVENTORY_LOCATION, slotX, slotY + 18, 7, 159, 18, 7); // border down
             }
 
-            guiGraphics.blit(INVENTORY_LOCATION, i+7+slotCount*18, j +168, 169, 0, 7, 25); //top left corner
-            guiGraphics.blit(INVENTORY_LOCATION, i+7+slotCount*18, j +193, 169, 159, 7, 7); // bottom right corner
+            guiGraphics.blit(INVENTORY_LOCATION, i + 7 + slotCount * 18, j + 168, 169, 0, 7, 25); //top left corner
+            guiGraphics.blit(INVENTORY_LOCATION, i + 7 + slotCount * 18, j + 193, 169, 159, 7, 7); // bottom right corner
 
             // Render backpack equip slot background if yyzsbackpack is loaded
             if (ModList.get().isLoaded("yyzsbackpack")) {

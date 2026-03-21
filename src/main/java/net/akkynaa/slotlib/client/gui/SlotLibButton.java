@@ -8,38 +8,39 @@ package net.akkynaa.slotlib.client.gui;
 import javax.annotation.Nonnull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
 import net.akkynaa.slotlib.SlotLib;
 import net.akkynaa.slotlib.client.SlotLibClientConfig;
 import net.akkynaa.slotlib.client.SlotLibClientConfig.Client.ButtonCorner;
+import net.akkynaa.slotlib.common.network.NetworkHandler;
 import net.akkynaa.slotlib.common.network.client.CPacketOpenSlotLib;
 import net.akkynaa.slotlib.common.network.client.CPacketOpenVanilla;
 
-public class SlotLibButton extends ImageButton {
+public class SlotLibButton extends Button {
 
-    public static final WidgetSprites BIG =
-            new WidgetSprites(
-                    ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "button"),
-                    ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "button_highlighted"));
-    public static final WidgetSprites SMALL =
-            new WidgetSprites(
-                    ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "button_small"),
-                    ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "button_small_highlighted"));
+    private static final ResourceLocation BUTTON_TEXTURE =
+            new ResourceLocation(SlotLib.MODID, "textures/gui/slotlib/button.png");
+    private static final ResourceLocation BUTTON_HIGHLIGHTED =
+            new ResourceLocation(SlotLib.MODID, "textures/gui/slotlib/button_highlighted.png");
+    private static final ResourceLocation BUTTON_SMALL =
+            new ResourceLocation(SlotLib.MODID, "textures/gui/slotlib/button_small.png");
+    private static final ResourceLocation BUTTON_SMALL_HIGHLIGHTED =
+            new ResourceLocation(SlotLib.MODID, "textures/gui/slotlib/button_small_highlighted.png");
 
     private final AbstractContainerScreen<?> parentGui;
+    private final boolean small;
 
-    public SlotLibButton(AbstractContainerScreen<?> parentGui, int xIn, int yIn, int widthIn, int heightIn,
-                  WidgetSprites sprites) {
-        super(xIn, yIn, widthIn, heightIn, sprites,
+    public SlotLibButton(AbstractContainerScreen<?> parentGui, int xIn, int yIn,
+                         int widthIn, int heightIn, boolean small) {
+        super(xIn, yIn, widthIn, heightIn, Component.empty(),
                 (button) -> {
                     Minecraft mc = Minecraft.getInstance();
 
@@ -51,7 +52,7 @@ public class SlotLibButton extends ImageButton {
                             InventoryScreen inventory = new InventoryScreen(mc.player);
                             mc.setScreen(inventory);
                             mc.player.containerMenu.setCarried(stack);
-                            PacketDistributor.sendToServer(new CPacketOpenVanilla(stack));
+                            NetworkHandler.CHANNEL.sendToServer(new CPacketOpenVanilla(stack));
                         } else {
                             if (parentGui instanceof InventoryScreen inventory) {
                                 RecipeBookComponent recipeBookGui = inventory.getRecipeBookComponent();
@@ -63,11 +64,13 @@ public class SlotLibButton extends ImageButton {
                                         mc.player.containerMenu.containerId));
                                 mc.player.containerMenu = mc.player.inventoryMenu;
                             }
-                            PacketDistributor.sendToServer(new CPacketOpenSlotLib(stack));
+                            NetworkHandler.CHANNEL.sendToServer(new CPacketOpenSlotLib(stack));
                         }
                     }
-                });
+                },
+                Button.DEFAULT_NARRATION);
         this.parentGui = parentGui;
+        this.small = small;
     }
 
     public static int[] getButtonPosition(AbstractContainerScreen<?> gui) {
@@ -100,6 +103,12 @@ public class SlotLibButton extends ImageButton {
                 return;
             }
         }
-        super.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+
+        ResourceLocation texture = this.isHovered
+                ? (small ? BUTTON_SMALL_HIGHLIGHTED : BUTTON_HIGHLIGHTED)
+                : (small ? BUTTON_SMALL : BUTTON_TEXTURE);
+
+        guiGraphics.blit(texture, this.getX(), this.getY(), 0, 0,
+                this.width, this.height, this.width, this.height);
     }
 }

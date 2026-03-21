@@ -5,27 +5,32 @@
  */
 package net.akkynaa.slotlib.common.network;
 
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
+import net.akkynaa.slotlib.SlotLib;
 import net.akkynaa.slotlib.common.network.client.CPacketOpenSlotLib;
 import net.akkynaa.slotlib.common.network.client.CPacketOpenVanilla;
-import net.akkynaa.slotlib.common.network.server.SlotLibServerPayloadHandler;
-import net.akkynaa.slotlib.common.network.server.SPacketSyncSlots;
 import net.akkynaa.slotlib.common.network.server.SPacketGrabbedItem;
-import net.akkynaa.slotlib.common.network.client.SlotLibClientPayloadHandler;
+import net.akkynaa.slotlib.common.network.server.SPacketSyncSlots;
 
 public class NetworkHandler {
 
-    public static void register(final PayloadRegistrar registrar) {
-        // Client -> Server
-        registrar.playToServer(CPacketOpenSlotLib.TYPE, CPacketOpenSlotLib.STREAM_CODEC,
-                SlotLibServerPayloadHandler.getInstance()::handleOpenSlotLib);
-        registrar.playToServer(CPacketOpenVanilla.TYPE, CPacketOpenVanilla.STREAM_CODEC,
-                SlotLibServerPayloadHandler.getInstance()::handleOpenVanilla);
+    private static final String PROTOCOL = "1";
 
-        // Server -> Client
-        registrar.playToClient(SPacketSyncSlots.TYPE, SPacketSyncSlots.STREAM_CODEC,
-                SlotLibClientPayloadHandler.getInstance()::handleSyncSlots);
-        registrar.playToClient(SPacketGrabbedItem.TYPE, SPacketGrabbedItem.STREAM_CODEC,
-                SlotLibClientPayloadHandler.getInstance()::handleGrabbedItem);
+    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
+            new ResourceLocation(SlotLib.MODID, "main"),
+            () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
+
+    public static void register() {
+        int id = 0;
+        CHANNEL.registerMessage(id++, CPacketOpenSlotLib.class,
+                CPacketOpenSlotLib::encode, CPacketOpenSlotLib::new, CPacketOpenSlotLib::handle);
+        CHANNEL.registerMessage(id++, CPacketOpenVanilla.class,
+                CPacketOpenVanilla::encode, CPacketOpenVanilla::new, CPacketOpenVanilla::handle);
+        CHANNEL.registerMessage(id++, SPacketSyncSlots.class,
+                SPacketSyncSlots::encode, SPacketSyncSlots::new, SPacketSyncSlots::handle);
+        CHANNEL.registerMessage(id++, SPacketGrabbedItem.class,
+                SPacketGrabbedItem::encode, SPacketGrabbedItem::new, SPacketGrabbedItem::handle);
     }
 }

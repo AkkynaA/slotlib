@@ -1,13 +1,14 @@
 package net.akkynaa.slotlib;
 
 import com.mojang.logging.LogUtils;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.akkynaa.slotlib.common.SlotLibRegistry;
 import net.akkynaa.slotlib.common.event.SlotLibEventHandler;
 import net.akkynaa.slotlib.common.network.NetworkHandler;
@@ -19,15 +20,13 @@ public class SlotLib {
     public static final String MODID = "slotlib";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public SlotLib(IEventBus modEventBus, ModContainer modContainer) {
+    public SlotLib() {
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         SlotLibRegistry.init(modEventBus);
-        modEventBus.addListener(this::registerPayloads);
-        NeoForge.EVENT_BUS.register(new SlotLibEventHandler());
-        modContainer.registerConfig(ModConfig.Type.COMMON, SlotLibConfig.SPEC);
-    }
+        NetworkHandler.register();
+        MinecraftForge.EVENT_BUS.register(new SlotLibEventHandler());
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SlotLibConfig.SPEC);
 
-    private void registerPayloads(final RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar(MODID).versioned("1.0.0");
-        NetworkHandler.register(registrar);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> SlotLibClient.init(modEventBus));
     }
 }

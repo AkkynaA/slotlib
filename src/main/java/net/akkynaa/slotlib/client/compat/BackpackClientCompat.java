@@ -20,7 +20,7 @@ public class BackpackClientCompat {
         int x = leftPos + 8 + 69 - 1 + backpackMenu.getBackpackEquipSlotX();
         int y = topPos + 8 - 1 + 18 * 2 + backpackMenu.getBackpackEquipSlotY();
         guiGraphics.blit(
-                ResourceLocation.fromNamespaceAndPath(Backpack.MOD_ID, "textures/gui/slot.png"),
+                new ResourceLocation(Backpack.MOD_ID, "textures/gui/slot.png"),
                 x, y, 0, 0, 18, 18, 18, 18);
     }
 }

@@ -5,16 +5,16 @@
  */
 package net.akkynaa.slotlib.client;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class SlotLibClientConfig {
 
-    public static final ModConfigSpec CLIENT_SPEC;
+    public static final ForgeConfigSpec CLIENT_SPEC;
     public static final Client CLIENT;
 
     static {
-        final Pair<Client, ModConfigSpec> specPair = new ModConfigSpec.Builder()
+        final Pair<Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder()
                 .configure(Client::new);
         CLIENT_SPEC = specPair.getRight();
         CLIENT = specPair.getLeft();
@@ -22,13 +22,13 @@ public class SlotLibClientConfig {
 
     public static class Client {
 
-        public final ModConfigSpec.EnumValue<ButtonCorner> buttonCorner;
-        public final ModConfigSpec.IntValue buttonXOffset;
-        public final ModConfigSpec.IntValue buttonYOffset;
-        public final ModConfigSpec.IntValue creativeButtonXOffset;
-        public final ModConfigSpec.IntValue creativeButtonYOffset;
+        public final ForgeConfigSpec.EnumValue<ButtonCorner> buttonCorner;
+        public final ForgeConfigSpec.IntValue buttonXOffset;
+        public final ForgeConfigSpec.IntValue buttonYOffset;
+        public final ForgeConfigSpec.IntValue creativeButtonXOffset;
+        public final ForgeConfigSpec.IntValue creativeButtonYOffset;
 
-        Client(ModConfigSpec.Builder builder) {
+        Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Client-side settings for SlotLib").push("client");
 
             buttonCorner = builder.comment("The corner of the player model to place the SlotLib button")

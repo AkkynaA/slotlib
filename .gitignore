@@ -1,43 +1,25 @@
-### Gradle ###
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/**/build/
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
 
-### IntelliJ IDEA ###
-.idea/
+# idea
+out
+*.ipr
 *.iws
 *.iml
-*.ipr
-out/
-!**/src/**/out/
+.idea
 
-.run/
+# gradle
+build
+.gradle
 
-libs/
+# other
+eclipse
+run
 
-### Eclipse ###
-.apt_generated
-.classpath
-.eclipse/
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/**/bin/
-
-### VS Code ###
-.vscode/
-
-### Mac OS ###
-.DS_Store
-
-### Minecraft Modding ###
-run/
-runs/
-!**/src/**/run/
-**/src/generated/**/.cache/
-repo/
-!**/src/**/repo/
+# Files from Forge MDK
+forge*changelog.txt

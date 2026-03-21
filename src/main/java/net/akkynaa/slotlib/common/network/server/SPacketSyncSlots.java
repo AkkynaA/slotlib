@@ -7,40 +7,54 @@ package net.akkynaa.slotlib.common.network.server;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import java.util.function.Supplier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
-import net.akkynaa.slotlib.SlotLib;
+import net.minecraftforge.network.NetworkEvent;
+import net.akkynaa.slotlib.common.capability.SlotLibCapabilityProvider;
 
-public record SPacketSyncSlots(int entityId, List<ItemStack> stacks) implements CustomPacketPayload {
+public class SPacketSyncSlots {
 
-    public static final Type<SPacketSyncSlots> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "sync_slots"));
+    private final int entityId;
+    private final List<ItemStack> stacks;
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SPacketSyncSlots> STREAM_CODEC =
-            StreamCodec.of(
-                    (buf, packet) -> {
-                        buf.writeVarInt(packet.entityId());
-                        buf.writeVarInt(packet.stacks().size());
-                        for (ItemStack stack : packet.stacks()) {
-                            ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, stack);
+    public SPacketSyncSlots(int entityId, List<ItemStack> stacks) {
+        this.entityId = entityId;
+        this.stacks = stacks;
+    }
+
+    public SPacketSyncSlots(FriendlyByteBuf buf) {
+        this.entityId = buf.readVarInt();
+        int size = buf.readVarInt();
+        this.stacks = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            this.stacks.add(buf.readItem());
+        }
+    }
+
+    public void encode(FriendlyByteBuf buf) {
+        buf.writeVarInt(this.entityId);
+        buf.writeVarInt(this.stacks.size());
+        for (ItemStack stack : this.stacks) {
+            buf.writeItem(stack);
+        }
+    }
+
+    public static void handle(SPacketSyncSlots msg, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.level != null) {
+                var entity = mc.level.getEntity(msg.entityId);
+                if (entity != null) {
+                    entity.getCapability(SlotLibCapabilityProvider.INVENTORY_CAP).ifPresent(inv -> {
+                        for (int i = 0; i < msg.stacks.size() && i < inv.getSlots(); i++) {
+                            inv.setStackInSlot(i, msg.stacks.get(i));
                         }
-                    },
-                    buf -> {
-                        int entityId = buf.readVarInt();
-                        int size = buf.readVarInt();
-                        List<ItemStack> stacks = new ArrayList<>(size);
-                        for (int i = 0; i < size; i++) {
-                            stacks.add(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf));
-                        }
-                        return new SPacketSyncSlots(entityId, stacks);
-                    }
-            );
-
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+                    });
+                }
+            }
+        });
+        ctx.get().setPacketHandled(true);
     }
 }

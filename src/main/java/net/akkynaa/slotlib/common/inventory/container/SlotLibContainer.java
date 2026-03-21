@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
@@ -27,23 +28,21 @@ import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.items.SlotItemHandler;
 import java.util.Objects;
 import java.util.Optional;
 
 import net.akkynaa.slotlib.common.SlotLibRegistry;
+import net.akkynaa.slotlib.common.capability.SlotLibCapabilityProvider;
 import net.akkynaa.slotlib.common.capability.SlotLibInventory;
 import net.akkynaa.slotlib.compat.BackpackCompat;
-import net.neoforged.fml.ModList;
 
-public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeInput>> {
+public class SlotLibContainer extends RecipeBookMenu<CraftingContainer> {
 
     private static final ResourceLocation[] ARMOR_SLOT_TEXTURES = new ResourceLocation[]{
             InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS, InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS,
@@ -66,7 +65,8 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
         super(SlotLibRegistry.SLOTLIB_MENU.get(), windowId);
         this.player = playerInventory.player;
         this.isLocalWorld = this.player.level().isClientSide;
-        this.slotLibInventory = this.player.getData(SlotLibRegistry.INVENTORY);
+        this.slotLibInventory = this.player.getCapability(SlotLibCapabilityProvider.INVENTORY_CAP)
+                .orElseGet(SlotLibInventory::new);
         this.setupSlots();
     }
 
@@ -111,7 +111,7 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
                 public boolean mayPickup(@Nonnull Player playerIn) {
                     ItemStack itemstack = this.getItem();
                     return (itemstack.isEmpty() || playerIn.isCreative()
-                            || !EnchantmentHelper.has(itemstack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE))
+                            || !EnchantmentHelper.hasBindingCurse(itemstack))
                             && super.mayPickup(playerIn);
                 }
 
@@ -172,17 +172,16 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
         if (!this.player.level().isClientSide) {
             ServerPlayer serverPlayer = (ServerPlayer) this.player;
             ItemStack itemstack = ItemStack.EMPTY;
-            Optional<RecipeHolder<CraftingRecipe>> optional =
+            Optional<CraftingRecipe> optional =
                     Objects.requireNonNull(this.player.level().getServer()).getRecipeManager()
-                            .getRecipeFor(RecipeType.CRAFTING, this.craftMatrix.asCraftInput(),
+                            .getRecipeFor(RecipeType.CRAFTING, this.craftMatrix,
                                     this.player.level());
 
             if (optional.isPresent()) {
-                RecipeHolder<CraftingRecipe> recipeHolder = optional.get();
-                CraftingRecipe craftingRecipe = recipeHolder.value();
+                CraftingRecipe craftingRecipe = optional.get();
 
-                if (this.craftResult.setRecipeUsed(this.player.level(), serverPlayer, recipeHolder)) {
-                    ItemStack result = craftingRecipe.assemble(this.craftMatrix.asCraftInput(),
+                if (this.craftResult.setRecipeUsed(this.player.level(), serverPlayer, craftingRecipe)) {
+                    ItemStack result = craftingRecipe.assemble(this.craftMatrix,
                             this.player.level().registryAccess());
 
                     if (result.isItemEnabled(this.player.level().enabledFeatures())) {
@@ -228,7 +227,7 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
         if (slot.hasItem()) {
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
-            EquipmentSlot entityEquipmentSlot = playerIn.getEquipmentSlotForItem(itemstack);
+            EquipmentSlot entityEquipmentSlot = Mob.getEquipmentSlotForItem(itemstack);
 
             if (index == 0) {
                 // Crafting result -> inventory
@@ -251,7 +250,7 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
                 if (!this.moveItemStackTo(itemstack1, 9, 45, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (entityEquipmentSlot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR
+            } else if (entityEquipmentSlot.getType() == EquipmentSlot.Type.ARMOR
                     && !this.slots.get(8 - entityEquipmentSlot.getIndex()).hasItem()) {
                 // Inventory -> armor
                 int i = 8 - entityEquipmentSlot.getIndex();
@@ -322,8 +321,8 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
     }
 
     @Override
-    public boolean recipeMatches(RecipeHolder recipeHolder) {
-        return recipeHolder.value().matches(this.craftMatrix.asCraftInput(), this.player.level());
+    public boolean recipeMatches(Recipe<? super CraftingContainer> recipe) {
+        return recipe.matches(this.craftMatrix, this.player.level());
     }
 
     @Override

@@ -5,26 +5,36 @@
  */
 package net.akkynaa.slotlib.common.network.server;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import java.util.function.Supplier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
-import net.akkynaa.slotlib.SlotLib;
+import net.minecraftforge.network.NetworkEvent;
 
-public record SPacketGrabbedItem(ItemStack stack) implements CustomPacketPayload {
+public class SPacketGrabbedItem {
 
-    public static final Type<SPacketGrabbedItem> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "grabbed_item"));
+    private final ItemStack stack;
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SPacketGrabbedItem> STREAM_CODEC =
-            StreamCodec.of(
-                    (buf, packet) -> ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, packet.stack()),
-                    buf -> new SPacketGrabbedItem(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf))
-            );
+    public SPacketGrabbedItem(ItemStack stack) {
+        this.stack = stack;
+    }
 
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public SPacketGrabbedItem(FriendlyByteBuf buf) {
+        this.stack = buf.readItem();
+    }
+
+    public void encode(FriendlyByteBuf buf) {
+        buf.writeItem(this.stack);
+    }
+
+    public static void handle(SPacketGrabbedItem msg, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player != null) {
+                player.containerMenu.setCarried(msg.stack);
+            }
+        });
+        ctx.get().setPacketHandled(true);
     }
 }

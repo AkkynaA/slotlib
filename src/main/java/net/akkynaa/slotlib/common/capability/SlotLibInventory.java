@@ -5,14 +5,12 @@
  */
 package net.akkynaa.slotlib.common.capability;
 
-import javax.annotation.Nonnull;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.items.ItemStackHandler;
 import net.akkynaa.slotlib.SlotLibConfig;
 
 public class SlotLibInventory implements INBTSerializable<CompoundTag> {
@@ -76,7 +74,7 @@ public class SlotLibInventory implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public CompoundTag serializeNBT(@Nonnull HolderLookup.Provider provider) {
+    public CompoundTag serializeNBT() {
         CompoundTag compound = new CompoundTag();
         ListTag tagList = new ListTag();
         for (int i = 0; i < this.stackHandler.getSlots(); i++) {
@@ -84,7 +82,8 @@ public class SlotLibInventory implements INBTSerializable<CompoundTag> {
             if (!stack.isEmpty()) {
                 CompoundTag tag = new CompoundTag();
                 tag.putInt("Slot", i);
-                tagList.add(stack.save(provider, tag));
+                stack.save(tag);
+                tagList.add(tag);
             }
         }
         compound.put("Items", tagList);
@@ -93,8 +92,7 @@ public class SlotLibInventory implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public void deserializeNBT(@Nonnull HolderLookup.Provider provider, @Nonnull CompoundTag nbt) {
-        int size = nbt.contains("Size") ? nbt.getInt("Size") : getSlotCount();
+    public void deserializeNBT(CompoundTag nbt) {
         int targetSize = getSlotCount();
         this.stackHandler = new ItemStackHandler(targetSize);
         this.previousStacks = new ItemStackHandler(targetSize);
@@ -104,8 +102,7 @@ public class SlotLibInventory implements INBTSerializable<CompoundTag> {
             CompoundTag tag = tagList.getCompound(i);
             int slot = tag.getInt("Slot");
             if (slot >= 0 && slot < targetSize) {
-                ItemStack.parse(provider, tag).ifPresent(stack ->
-                        this.stackHandler.setStackInSlot(slot, stack));
+                this.stackHandler.setStackInSlot(slot, ItemStack.of(tag));
             }
         }
     }

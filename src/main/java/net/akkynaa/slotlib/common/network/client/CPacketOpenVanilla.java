@@ -5,26 +5,51 @@
  */
 package net.akkynaa.slotlib.common.network.client;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import java.util.function.Supplier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.akkynaa.slotlib.SlotLib;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
+import net.akkynaa.slotlib.common.network.NetworkHandler;
+import net.akkynaa.slotlib.common.network.server.SPacketGrabbedItem;
 
-public record CPacketOpenVanilla(ItemStack carried) implements CustomPacketPayload {
+public class CPacketOpenVanilla {
 
-    public static final Type<CPacketOpenVanilla> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "open_vanilla"));
+    private final ItemStack carried;
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, CPacketOpenVanilla> STREAM_CODEC =
-            StreamCodec.of(
-                    (buf, packet) -> ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, packet.carried()),
-                    buf -> new CPacketOpenVanilla(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf))
-            );
+    public CPacketOpenVanilla(ItemStack carried) {
+        this.carried = carried;
+    }
 
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public CPacketOpenVanilla(FriendlyByteBuf buf) {
+        this.carried = buf.readItem();
+    }
+
+    public void encode(FriendlyByteBuf buf) {
+        buf.writeItem(this.carried);
+    }
+
+    public static void handle(CPacketOpenVanilla msg, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            Player player = ctx.get().getSender();
+
+            if (player instanceof ServerPlayer serverPlayer) {
+                ItemStack stack =
+                        player.isCreative() ? msg.carried : player.containerMenu.getCarried();
+                player.containerMenu.setCarried(ItemStack.EMPTY);
+                serverPlayer.doCloseContainer();
+
+                if (!stack.isEmpty()) {
+                    if (!player.isCreative()) {
+                        player.containerMenu.setCarried(stack);
+                    }
+                    NetworkHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
+                            new SPacketGrabbedItem(stack));
+                }
+            }
+        });
+        ctx.get().setPacketHandled(true);
     }
 }
