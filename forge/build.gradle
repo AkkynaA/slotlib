@@ -1,0 +1,84 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
+}
+
+minecraft {
+    mappings channel: "official", version: "${minecraft_version}"
+    reobf = false
+    copyIdeResources = true
+
+    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformer = at
+    }
+
+    runs {
+        configureEach {
+            workingDirectory file('runs')
+            ideaModule "${rootProject.name}.${project.name}.main"
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            taskName 'Client'
+        }
+
+        server {
+            taskName 'Server'
+            args '--nogui'
+        }
+
+        data {
+            taskName 'Data'
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
+}
+
+repositories {
+    maven {
+        name = "Curios"
+        url = "https://maven.theillusivec4.top/"
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    // Hack fix for now, force jopt-simple to be exactly 5.0.4 because Mojang ships that version
+    implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
+
+    // Curios API
+    implementation fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+            groupId = 'net.akkynaa'
+            artifactId = mod_id
+            version = "forge-${version}"
+        }
+    }
+}

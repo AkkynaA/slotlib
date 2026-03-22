@@ -21,5 +21,8 @@ build
 eclipse
 run
 
+forge/runs
+neoforge/runs
+
 # Files from Forge MDK
 forge*changelog.txt

@@ -1,0 +1,56 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.gradle.userdev' version '7.0.142'
+}
+
+def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+if (at.exists()) {
+    minecraft.accessTransformers.file at
+}
+
+runs {
+    configureEach {
+        modSource project.sourceSets.main
+    }
+    client {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+    }
+    server {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        programArgument '--nogui'
+    }
+    data {
+        programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    maven {
+        name = "Curios"
+        url = "https://maven.theillusivec4.top/"
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_version}"
+
+    // Curios API
+    implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+            groupId = 'net.akkynaa'
+            artifactId = mod_id
+            version = "neoforge-${version}"
+        }
+    }
+}
