@@ -6,15 +6,15 @@
 package net.akkynaa.slotlib.common.capability;
 
 import javax.annotation.Nonnull;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.common.util.ValueIOSerializable;
 import net.neoforged.neoforge.items.ItemStackHandler;
+
 import net.akkynaa.slotlib.SlotLibConfig;
 
-public class SlotLibInventory implements INBTSerializable<CompoundTag> {
+public class SlotLibInventory implements ValueIOSerializable {
 
     private ItemStackHandler stackHandler;
     private ItemStackHandler previousStacks;
@@ -75,37 +75,15 @@ public class SlotLibInventory implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public CompoundTag serializeNBT(@Nonnull HolderLookup.Provider provider) {
-        CompoundTag compound = new CompoundTag();
-        ListTag tagList = new ListTag();
-        for (int i = 0; i < this.stackHandler.getSlots(); i++) {
-            ItemStack stack = this.stackHandler.getStackInSlot(i);
-            if (!stack.isEmpty()) {
-                CompoundTag tag = new CompoundTag();
-                tag.putInt("Slot", i);
-                tagList.add(stack.save(provider, tag));
-            }
-        }
-        compound.put("Items", tagList);
-        compound.putInt("Size", this.stackHandler.getSlots());
-        return compound;
+    public void serialize(@Nonnull ValueOutput output) {
+        this.stackHandler.serialize(output);
     }
 
     @Override
-    public void deserializeNBT(@Nonnull HolderLookup.Provider provider, @Nonnull CompoundTag nbt) {
+    public void deserialize(@Nonnull ValueInput input) {
         int targetSize = getSlotCount();
         this.stackHandler = new ItemStackHandler(targetSize);
         this.previousStacks = new ItemStackHandler(targetSize);
-
-        ListTag tagList = nbt.getList("Items").orElse(new ListTag());
-        for (int i = 0; i < tagList.size(); i++) {
-            tagList.getCompound(i).ifPresent(tag -> {
-                int slot = tag.getInt("Slot").orElse(0);
-                if (slot >= 0 && slot < targetSize) {
-                    ItemStack.parse(provider, tag).ifPresent(stack ->
-                            this.stackHandler.setStackInSlot(slot, stack));
-                }
-            });
-        }
+        this.stackHandler.deserialize(input);
     }
 }

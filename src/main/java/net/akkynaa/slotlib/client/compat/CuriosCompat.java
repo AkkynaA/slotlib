@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import top.theillusivec4.curios.api.client.ICuriosScreen;
 import top.theillusivec4.curios.client.screen.button.CuriosButton;
 import top.theillusivec4.curios.client.screen.CuriosScreen;
@@ -40,7 +40,7 @@ public class CuriosCompat {
                         mc.player.connection.send(
                                 new ServerboundContainerClosePacket(mc.player.containerMenu.containerId));
                         mc.player.containerMenu = mc.player.inventoryMenu;
-                        PacketDistributor.sendToServer(new CPacketOpenCurios(stack));
+                        ClientPacketDistributor.sendToServer(new CPacketOpenCurios(stack));
                     }
                 }) {
             @Override

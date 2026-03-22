@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.akkynaa.slotlib.SlotLib;
 import net.akkynaa.slotlib.client.SlotLibClientConfig;
@@ -50,7 +51,7 @@ public class SlotLibButton extends ImageButton {
                             InventoryScreen inventory = new InventoryScreen(mc.player);
                             mc.setScreen(inventory);
                             mc.player.containerMenu.setCarried(stack);
-                            PacketDistributor.sendToServer(new CPacketOpenVanilla(stack));
+                            ClientPacketDistributor.sendToServer(new CPacketOpenVanilla(stack));
                         } else {
                             if (parentGui instanceof InventoryScreen) {
                                 // Recipe book is managed by the parent screen, no need to toggle
@@ -59,7 +60,7 @@ public class SlotLibButton extends ImageButton {
                                         mc.player.containerMenu.containerId));
                                 mc.player.containerMenu = mc.player.inventoryMenu;
                             }
-                            PacketDistributor.sendToServer(new CPacketOpenSlotLib(stack));
+                            ClientPacketDistributor.sendToServer(new CPacketOpenSlotLib(stack));
                         }
                     }
                 });

@@ -15,6 +15,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.CraftingRecipeBookComponent;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -87,7 +88,7 @@ public class SlotLibScreen extends AbstractRecipeBookScreen<SlotLibContainer> {
             int j = this.topPos;
 
             // Draw the standard 176x166 vanilla inventory background
-            guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, i, j, 0, 0, 176, 166, 256, 256);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, INVENTORY_LOCATION, i, j, 0, 0, 176, 166, 256, 256);
 
             // Render player model
             InventoryScreen.renderEntityInInventoryFollowsMouse(
@@ -99,21 +100,21 @@ public class SlotLibScreen extends AbstractRecipeBookScreen<SlotLibContainer> {
             int panelY = j + 166;
 
             // left edge
-            guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, i, j + 168, 0, 0, 7, 25, 256, 256);
-            guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, i, j + 193, 0, 159, 7, 7, 256, 256);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, INVENTORY_LOCATION, i, j + 168, 0, 0, 7, 25, 256, 256);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, INVENTORY_LOCATION, i, j + 193, 0, 159, 7, 7, 256, 256);
 
             // Draw slot backgrounds
             for (int s = 0; s < slotCount; s++) {
                 int slotX = i + 7 + s * 18;
                 int slotY = panelY + 9;
 
-                guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, slotX, slotY, 7, 83, 18, 18, 256, 256);
-                guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, slotX, slotY - 7, 7, 0, 18, 7, 256, 256);
-                guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, slotX, slotY + 18, 7, 159, 18, 7, 256, 256);
+                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, INVENTORY_LOCATION, slotX, slotY, 7, 83, 18, 18, 256, 256);
+                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, INVENTORY_LOCATION, slotX, slotY - 7, 7, 0, 18, 7, 256, 256);
+                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, INVENTORY_LOCATION, slotX, slotY + 18, 7, 159, 18, 7, 256, 256);
             }
 
-            guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, i + 7 + slotCount * 18, j + 168, 169, 0, 7, 25, 256, 256);
-            guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, i + 7 + slotCount * 18, j + 193, 169, 159, 7, 7, 256, 256);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, INVENTORY_LOCATION, i + 7 + slotCount * 18, j + 168, 169, 0, 7, 25, 256, 256);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, INVENTORY_LOCATION, i + 7 + slotCount * 18, j + 193, 169, 159, 7, 7, 256, 256);
 
             // Render backpack equip slot background if yyzsbackpack is loaded
             if (ModList.get().isLoaded("yyzsbackpack")) {
