@@ -5,45 +5,31 @@
  */
 package net.akkynaa.slotlib.common.inventory.container;
 
-import com.mojang.datafixers.util.Pair;
 import javax.annotation.Nonnull;
+import java.util.List;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.AbstractCraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.RecipeBookType;
-import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.items.SlotItemHandler;
-import java.util.Objects;
-import java.util.Optional;
 
 import net.akkynaa.slotlib.common.SlotLibRegistry;
 import net.akkynaa.slotlib.common.capability.SlotLibInventory;
 import net.akkynaa.slotlib.compat.BackpackCompat;
 import net.neoforged.fml.ModList;
 
-public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeInput>> {
+public class SlotLibContainer extends AbstractCraftingMenu {
 
     private static final ResourceLocation[] ARMOR_SLOT_TEXTURES = new ResourceLocation[]{
             InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS, InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS,
@@ -52,9 +38,6 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
             EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
     public final Player player;
-    private final boolean isLocalWorld;
-    private final CraftingContainer craftMatrix = new TransientCraftingContainer(this, 2, 2);
-    private final ResultContainer craftResult = new ResultContainer();
     private final SlotLibInventory slotLibInventory;
     private int slotLibStartIndex;
 
@@ -63,9 +46,8 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
     }
 
     public SlotLibContainer(int windowId, Inventory playerInventory) {
-        super(SlotLibRegistry.SLOTLIB_MENU.get(), windowId);
+        super(SlotLibRegistry.SLOTLIB_MENU.get(), windowId, 2, 2);
         this.player = playerInventory.player;
-        this.isLocalWorld = this.player.level().isClientSide;
         this.slotLibInventory = this.player.getData(SlotLibRegistry.INVENTORY);
         this.setupSlots();
     }
@@ -77,12 +59,12 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
         }
 
         // Crafting result slot (index 0)
-        this.addSlot(new ResultSlot(player, this.craftMatrix, this.craftResult, 0, 154, 28));
+        this.addSlot(new ResultSlot(player, this.craftSlots, this.resultSlots, 0, 154, 28));
 
         // 2x2 crafting grid (indices 1-4)
         for (int i = 0; i < 2; ++i) {
             for (int j = 0; j < 2; ++j) {
-                this.addSlot(new Slot(this.craftMatrix, j + i * 2, 98 + j * 18, 18 + i * 18));
+                this.addSlot(new Slot(this.craftSlots, j + i * 2, 98 + j * 18, 18 + i * 18));
             }
         }
 
@@ -117,9 +99,8 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
 
                 @OnlyIn(Dist.CLIENT)
                 @Override
-                public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
-                    return Pair.of(InventoryMenu.BLOCK_ATLAS,
-                            ARMOR_SLOT_TEXTURES[equipmentSlot.getIndex()]);
+                public ResourceLocation getNoItemIcon() {
+                    return ARMOR_SLOT_TEXTURES[equipmentSlot.getIndex()];
                 }
             });
         }
@@ -140,8 +121,8 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
         this.addSlot(new Slot(player.getInventory(), 40 + backpackOffset, 77, 62) {
             @OnlyIn(Dist.CLIENT)
             @Override
-            public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
-                return Pair.of(InventoryMenu.BLOCK_ATLAS, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD);
+            public ResourceLocation getNoItemIcon() {
+                return InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD;
             }
         });
 
@@ -168,42 +149,11 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
     }
 
     @Override
-    public void slotsChanged(@Nonnull Container inventoryIn) {
-        if (!this.player.level().isClientSide) {
-            ServerPlayer serverPlayer = (ServerPlayer) this.player;
-            ItemStack itemstack = ItemStack.EMPTY;
-            Optional<RecipeHolder<CraftingRecipe>> optional =
-                    Objects.requireNonNull(this.player.level().getServer()).getRecipeManager()
-                            .getRecipeFor(RecipeType.CRAFTING, this.craftMatrix.asCraftInput(),
-                                    this.player.level());
-
-            if (optional.isPresent()) {
-                RecipeHolder<CraftingRecipe> recipeHolder = optional.get();
-                CraftingRecipe craftingRecipe = recipeHolder.value();
-
-                if (this.craftResult.setRecipeUsed(this.player.level(), serverPlayer, recipeHolder)) {
-                    ItemStack result = craftingRecipe.assemble(this.craftMatrix.asCraftInput(),
-                            this.player.level().registryAccess());
-
-                    if (result.isItemEnabled(this.player.level().enabledFeatures())) {
-                        itemstack = result;
-                    }
-                }
-            }
-            this.craftResult.setItem(0, itemstack);
-            this.setRemoteSlot(0, itemstack);
-            serverPlayer.connection.send(
-                    new ClientboundContainerSetSlotPacket(this.containerId, this.incrementStateId(), 0,
-                            itemstack));
-        }
-    }
-
-    @Override
     public void removed(@Nonnull Player playerIn) {
         super.removed(playerIn);
-        this.craftResult.clearContent();
+        this.resultSlots.clearContent();
         if (!playerIn.level().isClientSide) {
-            this.clearContainer(playerIn, this.craftMatrix);
+            this.clearContainer(playerIn, this.craftSlots);
         }
     }
 
@@ -306,44 +256,18 @@ public class SlotLibContainer extends RecipeBookMenu<RecipeInput, Recipe<RecipeI
     }
 
     @Override
-    public boolean shouldMoveToInventory(int index) {
-        return index != this.getResultSlotIndex();
+    public Slot getResultSlot() {
+        return this.slots.getFirst();
     }
 
     @Override
-    public void fillCraftSlotsStackedContents(@Nonnull StackedContents itemHelperIn) {
-        this.craftMatrix.fillStackedContents(itemHelperIn);
+    public List<Slot> getInputGridSlots() {
+        return this.slots.subList(1, 5);
     }
 
     @Override
-    public void clearCraftingContent() {
-        this.craftMatrix.clearContent();
-        this.craftResult.clearContent();
-    }
-
-    @Override
-    public boolean recipeMatches(RecipeHolder recipeHolder) {
-        return recipeHolder.value().matches(this.craftMatrix.asCraftInput(), this.player.level());
-    }
-
-    @Override
-    public int getResultSlotIndex() {
-        return 0;
-    }
-
-    @Override
-    public int getGridWidth() {
-        return this.craftMatrix.getWidth();
-    }
-
-    @Override
-    public int getGridHeight() {
-        return this.craftMatrix.getHeight();
-    }
-
-    @Override
-    public int getSize() {
-        return 5;
+    public Player owner() {
+        return this.player;
     }
 
     @Nonnull

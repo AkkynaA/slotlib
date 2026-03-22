@@ -10,16 +10,14 @@ import com.mojang.blaze3d.platform.InputConstants;
 import javax.annotation.Nonnull;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
+import net.minecraft.client.gui.navigation.ScreenPosition;
+import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
-import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.client.gui.screens.recipebook.CraftingRecipeBookComponent;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.Slot;
 import net.akkynaa.slotlib.client.KeyRegistry;
 import net.akkynaa.slotlib.client.compat.BackpackClientCompat;
 import net.akkynaa.slotlib.client.compat.CuriosCompat;
@@ -27,90 +25,52 @@ import net.akkynaa.slotlib.compat.BackpackCompat;
 import net.akkynaa.slotlib.common.inventory.container.SlotLibContainer;
 import net.neoforged.fml.ModList;
 
-public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContainer>
-        implements RecipeUpdateListener {
+public class SlotLibScreen extends AbstractRecipeBookScreen<SlotLibContainer> {
 
-
-    private final RecipeBookComponent recipeBookGui = new RecipeBookComponent();
-    public boolean widthTooNarrow;
-
-    private ImageButton recipeBookButton;
     private SlotLibButton buttonSlotLib;
 
     // Extended height to accommodate slots below
     private int panelHeight = 0;
 
     public SlotLibScreen(SlotLibContainer container, Inventory playerInventory, Component title) {
-        super(container, playerInventory, title);
+        super(container, new CraftingRecipeBookComponent(container), playerInventory, title);
     }
 
     @Override
-    public void init() {
-        if (this.minecraft != null) {
-            this.leftPos = (this.width - this.imageWidth) / 2;
-            this.topPos = (this.height - this.imageHeight) / 2;
-            this.panelHeight = 32;
-            this.widthTooNarrow = true;
-            this.recipeBookGui.init(this.width, this.height, this.minecraft, true, this.menu);
-            this.addWidget(this.recipeBookGui);
-            this.setInitialFocus(this.recipeBookGui);
+    protected void init() {
+        super.init();
+        this.panelHeight = 32;
 
-            if (this.getMinecraft().player != null
-                    && this.getMinecraft().player.isCreative()
-                    && this.recipeBookGui.isVisible()) {
-                this.recipeBookGui.toggleVisibility();
-            }
+        int[] btnPos = SlotLibButton.getButtonPosition(this);
+        this.buttonSlotLib = new SlotLibButton(
+                this,
+                btnPos[0], btnPos[1],
+                10, 10,
+                SlotLibButton.BIG);
+        this.addRenderableWidget(this.buttonSlotLib);
 
-            int[] btnPos = SlotLibButton.getButtonPosition(this);
-            this.buttonSlotLib = new SlotLibButton(
-                    this,
-                    btnPos[0], btnPos[1],
-                    10, 10,
-                    SlotLibButton.BIG);
-            this.addRenderableWidget(this.buttonSlotLib);
-
-            if (ModList.get().isLoaded("curios")) {
-                this.addRenderableWidget(CuriosCompat.createCuriosButtonForSlotLibScreen(this));
-            }
-
-            if (!this.menu.player.isCreative()) {
-                this.recipeBookButton = new ImageButton(
-                        this.leftPos + 104,
-                        this.height / 2 - 22,
-                        20, 18,
-                        RecipeBookComponent.RECIPE_BUTTON_SPRITES,
-                        (button) -> {
-                            this.recipeBookGui.toggleVisibility();
-                            button.setPosition(this.leftPos + 104, this.height / 2 - 22);
-                        });
-                this.addRenderableWidget(this.recipeBookButton);
-            }
+        if (ModList.get().isLoaded("curios")) {
+            this.addRenderableWidget(CuriosCompat.createCuriosButtonForSlotLibScreen(this));
         }
     }
 
     @Override
-    public void containerTick() {
-        super.containerTick();
-        this.recipeBookGui.tick();
+    protected ScreenPosition getRecipeBookButtonPosition() {
+        return new ScreenPosition(this.leftPos + 104, this.height / 2 - 22);
+    }
+
+    @Override
+    protected boolean isBiggerResultSlot() {
+        return false;
     }
 
     @Override
     public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         if (ModList.get().isLoaded("yyzsbackpack")) {
-            BackpackCompat.setBackpackVisible(this.menu, !this.recipeBookGui.isVisible());
+            BackpackCompat.setBackpackVisible(this.menu, true);
             BackpackCompat.setBackpackGuiPos(this.menu, 0, 0);
         }
-
-        if (this.recipeBookGui.isVisible() && this.widthTooNarrow) {
-            this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
-            this.recipeBookGui.render(guiGraphics, mouseX, mouseY, partialTicks);
-        } else {
-            this.recipeBookGui.render(guiGraphics, mouseX, mouseY, partialTicks);
-            super.render(guiGraphics, mouseX, mouseY, partialTicks);
-            this.recipeBookGui.renderGhostRecipe(
-                    guiGraphics, this.leftPos, this.topPos, true, partialTicks);
-        }
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
+        super.render(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
     @Override
@@ -121,13 +81,13 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
     }
 
     @Override
-    public void renderBg(@Nonnull GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
+    protected void renderBg(@Nonnull GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
         if (this.minecraft != null && this.minecraft.player != null) {
             int i = this.leftPos;
             int j = this.topPos;
 
             // Draw the standard 176x166 vanilla inventory background
-            guiGraphics.blit(INVENTORY_LOCATION, i, j, 0, 0, 176, 166);
+            guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, i, j, 0, 0, 176, 166, 256, 256);
 
             // Render player model
             InventoryScreen.renderEntityInInventoryFollowsMouse(
@@ -139,22 +99,21 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
             int panelY = j + 166;
 
             // left edge
-            guiGraphics.blit(INVENTORY_LOCATION, i, j +168, 0, 0, 7, 25); //top left corner
-            guiGraphics.blit(INVENTORY_LOCATION, i, j +193, 0, 159, 7, 7); // bottom right corner
+            guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, i, j + 168, 0, 0, 7, 25, 256, 256);
+            guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, i, j + 193, 0, 159, 7, 7, 256, 256);
 
             // Draw slot backgrounds
             for (int s = 0; s < slotCount; s++) {
                 int slotX = i + 7 + s * 18;
                 int slotY = panelY + 9;
 
-                guiGraphics.blit(INVENTORY_LOCATION, slotX, slotY, 7, 83, 18, 18); // slot
-                guiGraphics.blit(INVENTORY_LOCATION, slotX, slotY-7, 7, 0, 18, 7); // border up
-                guiGraphics.blit(INVENTORY_LOCATION, slotX, slotY+18, 7, 159, 18, 7); // border down
-
+                guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, slotX, slotY, 7, 83, 18, 18, 256, 256);
+                guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, slotX, slotY - 7, 7, 0, 18, 7, 256, 256);
+                guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, slotX, slotY + 18, 7, 159, 18, 7, 256, 256);
             }
 
-            guiGraphics.blit(INVENTORY_LOCATION, i+7+slotCount*18, j +168, 169, 0, 7, 25); //top left corner
-            guiGraphics.blit(INVENTORY_LOCATION, i+7+slotCount*18, j +193, 169, 159, 7, 7); // bottom right corner
+            guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, i + 7 + slotCount * 18, j + 168, 169, 0, 7, 25, 256, 256);
+            guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, i + 7 + slotCount * 18, j + 193, 169, 159, 7, 7, 256, 256);
 
             // Render backpack equip slot background if yyzsbackpack is loaded
             if (ModList.get().isLoaded("yyzsbackpack")) {
@@ -165,40 +124,15 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (this.recipeBookGui.isVisible() && this.widthTooNarrow) {
-            this.recipeBookGui.toggleVisibility();
-            return true;
-        } else if (KeyRegistry.openSlotLib.isActiveAndMatches(
+        if (KeyRegistry.openSlotLib.isActiveAndMatches(
                 InputConstants.getKey(keyCode, scanCode))) {
             LocalPlayer playerEntity = this.getMinecraft().player;
             if (playerEntity != null) {
                 playerEntity.closeContainer();
             }
             return true;
-        } else {
-            return super.keyPressed(keyCode, scanCode, modifiers);
         }
-    }
-
-    @Override
-    protected boolean isHovering(int rectX, int rectY, int rectWidth, int rectHeight,
-                                 double pointX, double pointY) {
-        return (!this.widthTooNarrow || !this.recipeBookGui.isVisible())
-                && super.isHovering(rectX, rectY, rectWidth, rectHeight, pointX, pointY);
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if (this.recipeBookGui.mouseClicked(mouseX, mouseY, mouseButton)) {
-            return true;
-        }
-        return this.widthTooNarrow && this.recipeBookGui.isVisible()
-                || super.mouseClicked(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -210,25 +144,6 @@ public class SlotLibScreen extends EffectRenderingInventoryScreen<SlotLibContain
                 || mouseY < guiTopIn
                 || mouseX >= guiLeftIn + this.imageWidth
                 || mouseY >= guiTopIn + totalHeight;
-        return this.recipeBookGui.hasClickedOutside(mouseX, mouseY, this.leftPos, this.topPos,
-                this.imageWidth, totalHeight, mouseButton) && flag;
-    }
-
-    @Override
-    protected void slotClicked(@Nonnull Slot slotIn, int slotId, int mouseButton,
-                               @Nonnull ClickType type) {
-        super.slotClicked(slotIn, slotId, mouseButton, type);
-        this.recipeBookGui.slotClicked(slotIn);
-    }
-
-    @Override
-    public void recipesUpdated() {
-        this.recipeBookGui.recipesUpdated();
-    }
-
-    @Nonnull
-    @Override
-    public RecipeBookComponent getRecipeBookComponent() {
-        return this.recipeBookGui;
+        return super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn, mouseButton) && flag;
     }
 }

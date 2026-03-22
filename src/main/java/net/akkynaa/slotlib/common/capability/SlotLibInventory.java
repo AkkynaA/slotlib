@@ -9,7 +9,6 @@ import javax.annotation.Nonnull;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import net.neoforged.neoforge.items.ItemStackHandler;
@@ -94,19 +93,19 @@ public class SlotLibInventory implements INBTSerializable<CompoundTag> {
 
     @Override
     public void deserializeNBT(@Nonnull HolderLookup.Provider provider, @Nonnull CompoundTag nbt) {
-        int size = nbt.contains("Size") ? nbt.getInt("Size") : getSlotCount();
         int targetSize = getSlotCount();
         this.stackHandler = new ItemStackHandler(targetSize);
         this.previousStacks = new ItemStackHandler(targetSize);
 
-        ListTag tagList = nbt.getList("Items", Tag.TAG_COMPOUND);
+        ListTag tagList = nbt.getList("Items").orElse(new ListTag());
         for (int i = 0; i < tagList.size(); i++) {
-            CompoundTag tag = tagList.getCompound(i);
-            int slot = tag.getInt("Slot");
-            if (slot >= 0 && slot < targetSize) {
-                ItemStack.parse(provider, tag).ifPresent(stack ->
-                        this.stackHandler.setStackInSlot(slot, stack));
-            }
+            tagList.getCompound(i).ifPresent(tag -> {
+                int slot = tag.getInt("Slot").orElse(0);
+                if (slot >= 0 && slot < targetSize) {
+                    ItemStack.parse(provider, tag).ifPresent(stack ->
+                            this.stackHandler.setStackInSlot(slot, stack));
+                }
+            });
         }
     }
 }

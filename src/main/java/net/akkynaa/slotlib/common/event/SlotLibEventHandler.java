@@ -11,6 +11,7 @@ import java.util.List;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -81,7 +82,7 @@ public class SlotLibEventHandler {
         LivingEntity livingEntity = evt.getEntity();
 
         if (livingEntity instanceof Player player && !player.isSpectator()) {
-            boolean keepInventory = player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
+            boolean keepInventory = player.level().getServer().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
 
             if (!keepInventory && player.hasData(SlotLibRegistry.INVENTORY)) {
                 SlotLibInventory inv = player.getData(SlotLibRegistry.INVENTORY);
@@ -116,14 +117,15 @@ public class SlotLibEventHandler {
                     ExperienceOrb orb = evt.getOrb();
                     player.takeXpDelay = 2;
                     player.take(orb, 1);
-                    int toRepair = Math.min(orb.value * 2, stack.getDamageValue());
-                    orb.value -= toRepair / 2;
+                    int xpValue = orb.getValue();
+                    int toRepair = Math.min(xpValue * 2, stack.getDamageValue());
                     stack.setDamageValue(stack.getDamageValue() - toRepair);
+                    int remaining = xpValue - toRepair / 2;
 
-                    if (orb.value > 0) {
-                        player.giveExperiencePoints(orb.value);
+                    if (remaining > 0) {
+                        player.giveExperiencePoints(remaining);
                     }
-                    orb.remove(Entity.RemovalReason.KILLED);
+                    orb.discard();
                     return;
                 }
             }
@@ -144,7 +146,7 @@ public class SlotLibEventHandler {
                 ItemStack previous = inv.getPreviousStackInSlot(i);
 
                 if (!current.isEmpty()) {
-                    current.inventoryTick(player.level(), player, -1, false);
+                    current.inventoryTick(player.level(), player, EquipmentSlot.MAINHAND);
                 }
 
                 if (!ItemStack.matches(current, previous)) {

@@ -13,7 +13,6 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -53,11 +52,8 @@ public class SlotLibButton extends ImageButton {
                             mc.player.containerMenu.setCarried(stack);
                             PacketDistributor.sendToServer(new CPacketOpenVanilla(stack));
                         } else {
-                            if (parentGui instanceof InventoryScreen inventory) {
-                                RecipeBookComponent recipeBookGui = inventory.getRecipeBookComponent();
-                                if (recipeBookGui.isVisible()) {
-                                    recipeBookGui.toggleVisibility();
-                                }
+                            if (parentGui instanceof InventoryScreen) {
+                                // Recipe book is managed by the parent screen, no need to toggle
                             } else if (mc.player.containerMenu != mc.player.inventoryMenu) {
                                 mc.player.connection.send(new ServerboundContainerClosePacket(
                                         mc.player.containerMenu.containerId));

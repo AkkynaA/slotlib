@@ -35,6 +35,11 @@ repositories {
         name = "CurseForge"
         url = "https://cursemaven.com"
     }
+
+    maven {
+        url = "https://maven.theillusivec4.top/"
+    }
+
 }
 
 base {
@@ -84,7 +89,7 @@ runs {
         systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
     }
 
-    data {
+    clientData {
         // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
         // workingDirectory project.file('run-data')
 
@@ -110,12 +115,11 @@ dependencies {
     // For all intends and purposes: You can treat this dependency as if it is a normal library you would use.
     implementation "net.neoforged:neoforge:${neo_version}"
 
-    // Curios API - soft dependency, compile-only
-    implementation "maven.modrinth:curios:9.5.1+1.21.1-neoforge"
+    // Curios API - soft dependency
+    implementation "top.theillusivec4.curios:curios-neoforge:11.0.1+1.21.5"
 
-    // yyzsbackpack - soft dependency, compile-only
-    //compileOnly "curse.maven:yyzsbackpack-1285177:7019339"
-    implementation "maven.modrinth:yyzs-backpack:A6bCvCiA"
+    // yyzsbackpack - soft dependency
+    implementation "maven.modrinth:yyzs-backpack:wWoiUfxf"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
