@@ -76,6 +76,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact jar
+            artifact sourcesJar
             groupId = 'net.akkynaa'
             artifactId = mod_id
             version = "forge-${version}"

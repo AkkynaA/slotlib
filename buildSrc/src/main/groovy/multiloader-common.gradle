@@ -83,13 +83,6 @@ processResources {
 }
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId base.archivesName.get()
-            artifact jar
-            artifact sourcesJar
-        }
-    }
     repositories {
         maven {
             url = uri("${System.getProperty('user.home')}/maven")
