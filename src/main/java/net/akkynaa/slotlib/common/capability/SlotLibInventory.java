@@ -6,23 +6,25 @@
 package net.akkynaa.slotlib.common.capability;
 
 import javax.annotation.Nonnull;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.common.util.ValueIOSerializable;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 
 import net.akkynaa.slotlib.SlotLibConfig;
 
 public class SlotLibInventory implements ValueIOSerializable {
 
-    private ItemStackHandler stackHandler;
-    private ItemStackHandler previousStacks;
+    private ItemStacksResourceHandler stackHandler;
+    private NonNullList<ItemStack> previousStacks;
 
     public SlotLibInventory() {
         int slots = getSlotCount();
-        this.stackHandler = new ItemStackHandler(slots);
-        this.previousStacks = new ItemStackHandler(slots);
+        this.stackHandler = new ItemStacksResourceHandler(slots);
+        this.previousStacks = NonNullList.withSize(slots, ItemStack.EMPTY);
     }
 
     public static int getSlotCount() {
@@ -33,42 +35,43 @@ public class SlotLibInventory implements ValueIOSerializable {
         }
     }
 
-    public ItemStackHandler getStacks() {
+    public ItemStacksResourceHandler getStacks() {
         return this.stackHandler;
     }
 
     public int getSlots() {
-        return this.stackHandler.getSlots();
+        return this.stackHandler.size();
     }
 
     public ItemStack getStackInSlot(int slot) {
-        return this.stackHandler.getStackInSlot(slot);
+        ItemResource resource = this.stackHandler.getResource(slot);
+        return resource.toStack(this.stackHandler.getAmountAsInt(slot));
     }
 
     public void setStackInSlot(int slot, ItemStack stack) {
-        this.stackHandler.setStackInSlot(slot, stack);
+        this.stackHandler.set(slot, ItemResource.of(stack), stack.getCount());
     }
 
     public ItemStack getPreviousStackInSlot(int slot) {
-        if (slot < this.previousStacks.getSlots()) {
-            return this.previousStacks.getStackInSlot(slot);
+        if (slot < this.previousStacks.size()) {
+            return this.previousStacks.get(slot);
         }
         return ItemStack.EMPTY;
     }
 
     public void setPreviousStackInSlot(int slot, ItemStack stack) {
-        if (slot < this.previousStacks.getSlots()) {
-            this.previousStacks.setStackInSlot(slot, stack);
+        if (slot < this.previousStacks.size()) {
+            this.previousStacks.set(slot, stack);
         }
     }
 
     public void resize(int newSize) {
-        ItemStackHandler newHandler = new ItemStackHandler(newSize);
-        ItemStackHandler newPrevious = new ItemStackHandler(newSize);
-        int copyCount = Math.min(this.stackHandler.getSlots(), newSize);
+        ItemStacksResourceHandler newHandler = new ItemStacksResourceHandler(newSize);
+        NonNullList<ItemStack> newPrevious = NonNullList.withSize(newSize, ItemStack.EMPTY);
+        int copyCount = Math.min(this.stackHandler.size(), newSize);
         for (int i = 0; i < copyCount; i++) {
-            newHandler.setStackInSlot(i, this.stackHandler.getStackInSlot(i));
-            newPrevious.setStackInSlot(i, this.previousStacks.getStackInSlot(i));
+            newHandler.set(i, this.stackHandler.getResource(i), this.stackHandler.getAmountAsInt(i));
+            newPrevious.set(i, this.previousStacks.get(i));
         }
         this.stackHandler = newHandler;
         this.previousStacks = newPrevious;
@@ -82,8 +85,8 @@ public class SlotLibInventory implements ValueIOSerializable {
     @Override
     public void deserialize(@Nonnull ValueInput input) {
         int targetSize = getSlotCount();
-        this.stackHandler = new ItemStackHandler(targetSize);
-        this.previousStacks = new ItemStackHandler(targetSize);
+        this.stackHandler = new ItemStacksResourceHandler(targetSize);
+        this.previousStacks = NonNullList.withSize(targetSize, ItemStack.EMPTY);
         this.stackHandler.deserialize(input);
     }
 }

@@ -20,7 +20,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 import net.akkynaa.slotlib.common.SlotLibRegistry;
 import net.akkynaa.slotlib.common.capability.SlotLibInventory;
@@ -125,8 +126,9 @@ public class SlotLibContainer extends AbstractCraftingMenu {
         // SlotLib slots (indices 46+)
         this.slotLibStartIndex = this.slots.size();
         int slotCount = this.slotLibInventory.getSlots();
+        ItemStacksResourceHandler handler = this.slotLibInventory.getStacks();
         for (int i = 0; i < slotCount; i++) {
-            this.addSlot(new SlotItemHandler(this.slotLibInventory.getStacks(), i,
+            this.addSlot(new ResourceHandlerSlot(handler, handler::set, i,
                     8 + i * 18, 176));
         }
 
