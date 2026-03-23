@@ -7,6 +7,7 @@ package net.akkynaa.slotlib.common.network.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.akkynaa.slotlib.common.SlotLibRegistry;
 import net.akkynaa.slotlib.common.capability.SlotLibInventory;
@@ -24,13 +25,16 @@ public class SlotLibClientPayloadHandler {
     public void handleSyncSlots(final SPacketSyncSlots data, final IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.level != null) {
-                var entity = mc.level.getEntity(data.entityId());
-                if (entity != null && entity.hasData(SlotLibRegistry.INVENTORY)) {
-                    SlotLibInventory inv = entity.getData(SlotLibRegistry.INVENTORY);
-                    for (int i = 0; i < data.stacks().size() && i < inv.getSlots(); i++) {
-                        inv.setStackInSlot(i, data.stacks().get(i));
-                    }
+            Entity entity = null;
+            if (mc.player != null && mc.player.getId() == data.entityId()) {
+                entity = mc.player;
+            } else if (mc.level != null) {
+                entity = mc.level.getEntity(data.entityId());
+            }
+            if (entity != null && entity.hasData(SlotLibRegistry.INVENTORY)) {
+                SlotLibInventory inv = entity.getData(SlotLibRegistry.INVENTORY);
+                for (int i = 0; i < data.stacks().size() && i < inv.getSlots(); i++) {
+                    inv.setStackInSlot(i, data.stacks().get(i));
                 }
             }
         });
