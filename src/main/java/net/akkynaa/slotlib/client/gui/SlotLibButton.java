@@ -14,7 +14,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -28,12 +28,12 @@ public class SlotLibButton extends ImageButton {
 
     public static final WidgetSprites BIG =
             new WidgetSprites(
-                    ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "button"),
-                    ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "button_highlighted"));
+                    Identifier.fromNamespaceAndPath(SlotLib.MODID, "button"),
+                    Identifier.fromNamespaceAndPath(SlotLib.MODID, "button_highlighted"));
     public static final WidgetSprites SMALL =
             new WidgetSprites(
-                    ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "button_small"),
-                    ResourceLocation.fromNamespaceAndPath(SlotLib.MODID, "button_small_highlighted"));
+                    Identifier.fromNamespaceAndPath(SlotLib.MODID, "button_small"),
+                    Identifier.fromNamespaceAndPath(SlotLib.MODID, "button_small_highlighted"));
 
     private final AbstractContainerScreen<?> parentGui;
 
@@ -84,8 +84,8 @@ public class SlotLibButton extends ImageButton {
     }
 
     @Override
-    public void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY,
-                             float partialTicks) {
+    public void renderContents(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY,
+                               float partialTicks) {
         int[] pos = getButtonPosition(parentGui);
         this.setX(pos[0]);
         this.setY(pos[1]);
@@ -97,6 +97,6 @@ public class SlotLibButton extends ImageButton {
                 return;
             }
         }
-        super.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+        super.renderContents(guiGraphics, mouseX, mouseY, partialTicks);
     }
 }

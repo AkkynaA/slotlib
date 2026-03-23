@@ -1,6 +1,7 @@
 /*
  * Copyright (c) AkkynaA. Licensed under GPL-3.0-or-later.
  */
+/*
 package net.akkynaa.slotlib.compat;
 
 import com.yyz.yyzsbackpack.base.BackpackMenu;
@@ -28,3 +29,4 @@ public class BackpackCompat {
         ((BackpackMenu) menu).setBackpackGuiPos(x, y);
     }
 }
+*/

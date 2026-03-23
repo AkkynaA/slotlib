@@ -16,7 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
@@ -82,7 +82,7 @@ public class SlotLibEventHandler {
         LivingEntity livingEntity = evt.getEntity();
 
         if (livingEntity instanceof Player player && !player.isSpectator()) {
-            boolean keepInventory = player.level().getServer().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
+            boolean keepInventory = player.level().getServer().getWorldData().getGameRules().get(GameRules.KEEP_INVENTORY);
 
             if (!keepInventory && player.hasData(SlotLibRegistry.INVENTORY)) {
                 SlotLibInventory inv = player.getData(SlotLibRegistry.INVENTORY);
@@ -103,7 +103,7 @@ public class SlotLibEventHandler {
     @SubscribeEvent
     public void playerXPPickUp(PlayerXpEvent.PickupXp evt) {
         Player player = evt.getEntity();
-        if (!player.level().isClientSide && player.hasData(SlotLibRegistry.INVENTORY)) {
+        if (!player.level().isClientSide() && player.hasData(SlotLibRegistry.INVENTORY)) {
             SlotLibInventory inv = player.getData(SlotLibRegistry.INVENTORY);
             Holder<Enchantment> mendingHolder =
                     player.level().registryAccess()
@@ -136,7 +136,7 @@ public class SlotLibEventHandler {
     public void tick(EntityTickEvent.Post evt) {
         Entity entity = evt.getEntity();
 
-        if (entity instanceof Player player && !player.level().isClientSide
+        if (entity instanceof Player player && !player.level().isClientSide()
                 && player.hasData(SlotLibRegistry.INVENTORY)) {
             SlotLibInventory inv = player.getData(SlotLibRegistry.INVENTORY);
             boolean dirty = false;

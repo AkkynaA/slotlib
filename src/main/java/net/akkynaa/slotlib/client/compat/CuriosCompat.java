@@ -44,12 +44,12 @@ public class CuriosCompat {
                     }
                 }) {
             @Override
-            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+            public void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
                 // Reposition every frame using Curios' own offset config
                 Tuple<Integer, Integer> offsets = CuriosScreen.getButtonOffset(false);
                 this.setX(screen.getGuiLeft() + offsets.getA() + 2);
                 this.setY(screen.getGuiTop() + offsets.getB() + 85);
-                super.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+                super.renderContents(guiGraphics, mouseX, mouseY, partialTicks);
             }
         };
     }

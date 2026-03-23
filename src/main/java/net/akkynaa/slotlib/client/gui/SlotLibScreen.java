@@ -14,15 +14,15 @@ import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.CraftingRecipeBookComponent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.akkynaa.slotlib.client.KeyRegistry;
-import net.akkynaa.slotlib.client.compat.BackpackClientCompat;
+//import net.akkynaa.slotlib.client.compat.BackpackClientCompat;
 import net.akkynaa.slotlib.client.compat.CuriosCompat;
-import net.akkynaa.slotlib.compat.BackpackCompat;
+//import net.akkynaa.slotlib.compat.BackpackCompat;
 import net.akkynaa.slotlib.common.inventory.container.SlotLibContainer;
 import net.neoforged.fml.ModList;
 
@@ -67,10 +67,10 @@ public class SlotLibScreen extends AbstractRecipeBookScreen<SlotLibContainer> {
 
     @Override
     public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        if (ModList.get().isLoaded("yyzsbackpack")) {
-            BackpackCompat.setBackpackVisible(this.menu, true);
-            BackpackCompat.setBackpackGuiPos(this.menu, 0, 0);
-        }
+        //if (ModList.get().isLoaded("yyzsbackpack")) {
+        //    BackpackCompat.setBackpackVisible(this.menu, true);
+        //    BackpackCompat.setBackpackGuiPos(this.menu, 0, 0);
+        //}
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
@@ -118,33 +118,32 @@ public class SlotLibScreen extends AbstractRecipeBookScreen<SlotLibContainer> {
 
             // Render backpack equip slot background if yyzsbackpack is loaded
             if (ModList.get().isLoaded("yyzsbackpack")) {
-                BackpackClientCompat.renderEquipSlotBackground(this.menu, guiGraphics, i, j);
+                //BackpackClientCompat.renderEquipSlotBackground(this.menu, guiGraphics, i, j);
             }
         }
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(@Nonnull KeyEvent event) {
         if (KeyRegistry.openSlotLib.isActiveAndMatches(
-                InputConstants.getKey(keyCode, scanCode))) {
+                InputConstants.getKey(event))) {
             LocalPlayer playerEntity = this.getMinecraft().player;
             if (playerEntity != null) {
                 playerEntity.closeContainer();
             }
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn,
-                                        int mouseButton) {
+    protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn) {
         // Include the panel below the vanilla inventory in the "inside" area
         int totalHeight = this.imageHeight + this.panelHeight;
         boolean flag = mouseX < guiLeftIn
                 || mouseY < guiTopIn
                 || mouseX >= guiLeftIn + this.imageWidth
                 || mouseY >= guiTopIn + totalHeight;
-        return super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn, mouseButton) && flag;
+        return super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn) && flag;
     }
 }

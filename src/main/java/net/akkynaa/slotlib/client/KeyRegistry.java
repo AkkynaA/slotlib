@@ -11,5 +11,5 @@ import org.lwjgl.glfw.GLFW;
 public class KeyRegistry {
 
     public static KeyMapping openSlotLib =
-            new KeyMapping("key.slotlib.open.desc", GLFW.GLFW_KEY_G, "key.slotlib.category");
+            new KeyMapping("key.slotlib.open.desc", GLFW.GLFW_KEY_G, KeyMapping.Category.GAMEPLAY);
 }

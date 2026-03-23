@@ -8,7 +8,7 @@ package net.akkynaa.slotlib.common.inventory.container;
 import javax.annotation.Nonnull;
 import java.util.List;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -26,12 +26,12 @@ import net.neoforged.neoforge.items.SlotItemHandler;
 
 import net.akkynaa.slotlib.common.SlotLibRegistry;
 import net.akkynaa.slotlib.common.capability.SlotLibInventory;
-import net.akkynaa.slotlib.compat.BackpackCompat;
-import net.neoforged.fml.ModList;
+//import net.akkynaa.slotlib.compat.BackpackCompat;
+//import net.neoforged.fml.ModList;
 
 public class SlotLibContainer extends AbstractCraftingMenu {
 
-    private static final ResourceLocation[] ARMOR_SLOT_TEXTURES = new ResourceLocation[]{
+    private static final Identifier[] ARMOR_SLOT_TEXTURES = new Identifier[]{
             InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS, InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS,
             InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE, InventoryMenu.EMPTY_ARMOR_SLOT_HELMET};
     private static final EquipmentSlot[] VALID_EQUIPMENT_SLOTS = new EquipmentSlot[]{
@@ -54,9 +54,9 @@ public class SlotLibContainer extends AbstractCraftingMenu {
 
     private void setupSlots() {
         int backpackOffset = 0;
-        if (ModList.get().isLoaded("yyzsbackpack")) {
-            backpackOffset = BackpackCompat.getSlotIndexOffset();
-        }
+        //if (ModList.get().isLoaded("yyzsbackpack")) {
+        //    backpackOffset = BackpackCompat.getSlotIndexOffset();
+        //}
 
         // Crafting result slot (index 0)
         this.addSlot(new ResultSlot(player, this.craftSlots, this.resultSlots, 0, 154, 28));
@@ -99,7 +99,7 @@ public class SlotLibContainer extends AbstractCraftingMenu {
 
                 @OnlyIn(Dist.CLIENT)
                 @Override
-                public ResourceLocation getNoItemIcon() {
+                public Identifier getNoItemIcon() {
                     return ARMOR_SLOT_TEXTURES[equipmentSlot.getIndex()];
                 }
             });
@@ -121,7 +121,7 @@ public class SlotLibContainer extends AbstractCraftingMenu {
         this.addSlot(new Slot(player.getInventory(), 40 + backpackOffset, 77, 62) {
             @OnlyIn(Dist.CLIENT)
             @Override
-            public ResourceLocation getNoItemIcon() {
+            public Identifier getNoItemIcon() {
                 return InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD;
             }
         });
@@ -135,9 +135,9 @@ public class SlotLibContainer extends AbstractCraftingMenu {
         }
 
         // Backpack slots (after SlotLib slots, when yyzsbackpack is loaded)
-        if (ModList.get().isLoaded("yyzsbackpack")) {
-            BackpackCompat.addBackpackSlots(this, player.getInventory());
-        }
+        //if (ModList.get().isLoaded("yyzsbackpack")) {
+        //    BackpackCompat.addBackpackSlots(this, player.getInventory());
+        //}
     }
 
     public int getSlotLibStartIndex() {
@@ -152,7 +152,7 @@ public class SlotLibContainer extends AbstractCraftingMenu {
     public void removed(@Nonnull Player playerIn) {
         super.removed(playerIn);
         this.resultSlots.clearContent();
-        if (!playerIn.level().isClientSide) {
+        if (!playerIn.level().isClientSide()) {
             this.clearContainer(playerIn, this.craftSlots);
         }
     }
