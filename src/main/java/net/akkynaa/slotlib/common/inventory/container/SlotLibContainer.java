@@ -20,8 +20,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.items.SlotItemHandler;
 
 import net.akkynaa.slotlib.common.SlotLibRegistry;
@@ -97,7 +95,6 @@ public class SlotLibContainer extends AbstractCraftingMenu {
                             && super.mayPickup(playerIn);
                 }
 
-                @OnlyIn(Dist.CLIENT)
                 @Override
                 public ResourceLocation getNoItemIcon() {
                     return ARMOR_SLOT_TEXTURES[equipmentSlot.getIndex()];
@@ -119,7 +116,6 @@ public class SlotLibContainer extends AbstractCraftingMenu {
 
         // Shield slot (index 45)
         this.addSlot(new Slot(player.getInventory(), 40 + backpackOffset, 77, 62) {
-            @OnlyIn(Dist.CLIENT)
             @Override
             public ResourceLocation getNoItemIcon() {
                 return InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD;
