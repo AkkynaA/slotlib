@@ -22,10 +22,10 @@ public class NetworkHandler {
         registrar.playToServer(CPacketOpenVanilla.TYPE, CPacketOpenVanilla.STREAM_CODEC,
                 SlotLibServerPayloadHandler.getInstance()::handleOpenVanilla);
 
-        // Server -> Client
+        // Server -> Client (lambdas defer class loading so client-only classes aren't loaded on dedicated server)
         registrar.playToClient(SPacketSyncSlots.TYPE, SPacketSyncSlots.STREAM_CODEC,
-                SlotLibClientPayloadHandler.getInstance()::handleSyncSlots);
+                (data, ctx) -> SlotLibClientPayloadHandler.getInstance().handleSyncSlots(data, ctx));
         registrar.playToClient(SPacketGrabbedItem.TYPE, SPacketGrabbedItem.STREAM_CODEC,
-                SlotLibClientPayloadHandler.getInstance()::handleGrabbedItem);
+                (data, ctx) -> SlotLibClientPayloadHandler.getInstance().handleGrabbedItem(data, ctx));
     }
 }
