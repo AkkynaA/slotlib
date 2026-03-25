@@ -19,6 +19,7 @@ public class SlotLibInventory implements INBTSerializable<CompoundTag> {
 
     private ItemStackHandler stackHandler;
     private ItemStackHandler previousStacks;
+    private int syncCountdown = 0;
 
     public SlotLibInventory() {
         int slots = getSlotCount();
@@ -60,6 +61,16 @@ public class SlotLibInventory implements INBTSerializable<CompoundTag> {
     public void setPreviousStackInSlot(int slot, ItemStack stack) {
         if (slot < this.previousStacks.getSlots()) {
             this.previousStacks.setStackInSlot(slot, stack);
+        }
+    }
+
+    public int getSyncCountdown() {
+        return this.syncCountdown;
+    }
+
+    public void decrementSyncCountdown() {
+        if (this.syncCountdown > 0) {
+            this.syncCountdown--;
         }
     }
 
@@ -108,5 +119,6 @@ public class SlotLibInventory implements INBTSerializable<CompoundTag> {
                         this.stackHandler.setStackInSlot(slot, stack));
             }
         }
+        this.syncCountdown = 20;
     }
 }
