@@ -92,8 +92,8 @@ configurations {
 
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
-    implementation "top.theillusivec4.curios:curios-neoforge:12.0.0+1.21.8"
-    implementation "maven.modrinth:yyzs-backpack:TR3Q4AgG"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:12.0.0+1.21.8"
+    compileOnly "maven.modrinth:yyzs-backpack:TR3Q4AgG"
 }
 
 tasks.withType(ProcessResources).configureEach {
