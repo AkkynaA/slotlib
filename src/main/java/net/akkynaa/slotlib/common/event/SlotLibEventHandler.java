@@ -155,8 +155,9 @@ public class SlotLibEventHandler {
                 }
             }
 
-            if (dirty) {
+            if (dirty || inv.getSyncCountdown() > 0) {
                 syncInventoryToTracking(player);
+                inv.decrementSyncCountdown();
             }
         }
     }
