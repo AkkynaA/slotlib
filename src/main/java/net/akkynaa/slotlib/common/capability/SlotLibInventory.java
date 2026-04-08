@@ -20,6 +20,7 @@ public class SlotLibInventory implements ValueIOSerializable {
 
     private ItemStacksResourceHandler stackHandler;
     private NonNullList<ItemStack> previousStacks;
+    private int syncCountdown = 0;
 
     public SlotLibInventory() {
         int slots = getSlotCount();
@@ -65,6 +66,16 @@ public class SlotLibInventory implements ValueIOSerializable {
         }
     }
 
+    public int getSyncCountdown() {
+        return this.syncCountdown;
+    }
+
+    public void decrementSyncCountdown() {
+        if (this.syncCountdown > 0) {
+            this.syncCountdown--;
+        }
+    }
+
     public void resize(int newSize) {
         ItemStacksResourceHandler newHandler = new ItemStacksResourceHandler(newSize);
         NonNullList<ItemStack> newPrevious = NonNullList.withSize(newSize, ItemStack.EMPTY);
@@ -88,5 +99,6 @@ public class SlotLibInventory implements ValueIOSerializable {
         this.stackHandler = new ItemStacksResourceHandler(targetSize);
         this.previousStacks = NonNullList.withSize(targetSize, ItemStack.EMPTY);
         this.stackHandler.deserialize(input);
+        this.syncCountdown = 20;
     }
 }
