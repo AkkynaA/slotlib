@@ -96,7 +96,7 @@ configurations {
 
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
-    implementation "top.theillusivec4.curios:curios-neoforge:14.0.0+1.21.11"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:14.0.0+1.21.11"
     //implementation "maven.modrinth:yyzs-backpack:XXXXXX" -- not available yet
 }
 
