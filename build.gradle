@@ -37,7 +37,11 @@ repositories {
 base {
     archivesName = "${mod_id}-neoforge"
 }
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar()
+}
 
 neoForge {
     version = project.neo_version
